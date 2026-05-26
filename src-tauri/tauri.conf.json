@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tmptauri-scaffold",
+  "productName": "桌面便利贴",
   "version": "0.1.0",
   "identifier": "com.codex.desktop-note",
   "build": {
@@ -12,9 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "tmptauri-scaffold",
-        "width": 800,
-        "height": 600
+        "title": "桌面便利贴",
+        "width": 390,
+        "height": 560,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true
       }
     ],
     "security": {

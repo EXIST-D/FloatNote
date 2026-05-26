@@ -1,35 +1,58 @@
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Minus, Pin, Settings, X } from "lucide-react";
 import type { ReactNode } from "react";
+import { useState } from "react";
+import type { ThemeName } from "../../types/domain";
 import { IconButton } from "../common/IconButton";
+import { ThemeMenu } from "../theme/ThemeMenu";
 
 interface FloatingWindowProps {
   children: ReactNode;
+  theme: ThemeName;
+  onThemeChange: (theme: ThemeName) => void;
+  alwaysOnTop: boolean;
+  onAlwaysOnTopChange: (value: boolean) => void;
 }
 
-export function FloatingWindow({ children }: FloatingWindowProps) {
+export function FloatingWindow({ children, theme, onThemeChange, alwaysOnTop, onAlwaysOnTopChange }: FloatingWindowProps) {
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+
   return (
     <main className="min-h-screen bg-transparent p-4">
-      <section className="w-[360px] overflow-hidden rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--text-main)] shadow-[var(--shadow)]">
+      <section className="relative w-[360px] overflow-hidden rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--text-main)] shadow-[var(--shadow)]">
         <header
           data-tauri-drag-region
           className="flex h-9 items-center justify-between border-b border-[var(--app-border)] bg-[var(--drag-bg)] px-3"
         >
           <h1 className="text-sm font-semibold tracking-normal">桌面便利贴</h1>
           <div className="flex items-center gap-1">
-            <IconButton label="置顶">
-              <Pin size={15} />
+            <IconButton
+              label={alwaysOnTop ? "取消置顶" : "置顶"}
+              className={alwaysOnTop ? "text-[var(--accent)]" : ""}
+              onClick={() => onAlwaysOnTopChange(!alwaysOnTop)}
+            >
+              <Pin size={15} fill={alwaysOnTop ? "currentColor" : "none"} />
             </IconButton>
-            <IconButton label="设置">
+            <IconButton label="主题" onClick={() => setThemeMenuOpen((open) => !open)}>
               <Settings size={15} />
             </IconButton>
-            <IconButton label="收起">
+            <IconButton label="收起" onClick={() => void getCurrentWindow().hide()}>
               <Minus size={15} />
             </IconButton>
-            <IconButton label="关闭">
+            <IconButton label="关闭" onClick={() => void getCurrentWindow().hide()}>
               <X size={15} />
             </IconButton>
           </div>
         </header>
+        {themeMenuOpen && (
+          <ThemeMenu
+            theme={theme}
+            onChange={(nextTheme) => {
+              onThemeChange(nextTheme);
+              setThemeMenuOpen(false);
+            }}
+          />
+        )}
         {children}
       </section>
     </main>

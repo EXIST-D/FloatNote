@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FloatingWindow } from "../components/layout/FloatingWindow";
 import { TabBar } from "../components/layout/TabBar";
 import { TimerStrip } from "../components/layout/TimerStrip";
@@ -6,23 +6,39 @@ import { FocusView } from "../features/focus/FocusView";
 import { useFocusSession } from "../features/focus/useFocusSession";
 import { HistoryView } from "../features/history/HistoryView";
 import { NotesView } from "../features/notes/NotesView";
+import { useSettings } from "../features/settings/useSettings";
 import { TodayView } from "../features/today/TodayView";
 import { WeekView } from "../features/week/WeekView";
 import type { AppTab } from "../types/domain";
 
 export function AppShell() {
-  const [activeTab, setActiveTab] = useState<AppTab>("today");
+  const settings = useSettings();
+  const [activeTab, setActiveTab] = useState<AppTab>(settings.lastActiveTab);
   const focus = useFocusSession();
 
+  useEffect(() => {
+    setActiveTab(settings.lastActiveTab);
+  }, [settings.lastActiveTab]);
+
+  function changeTab(tab: AppTab) {
+    setActiveTab(tab);
+    void settings.setLastActiveTab(tab);
+  }
+
   return (
-    <FloatingWindow>
-      <TabBar activeTab={activeTab} onChange={setActiveTab} />
+    <FloatingWindow
+      theme={settings.theme}
+      onThemeChange={(theme) => void settings.setTheme(theme)}
+      alwaysOnTop={settings.alwaysOnTop}
+      onAlwaysOnTopChange={(value) => void settings.setAlwaysOnTop(value)}
+    >
+      <TabBar activeTab={activeTab} onChange={changeTab} />
       {focus.session && (
         <TimerStrip
           title={focus.session.title}
           elapsed={focus.elapsedText}
           paused={focus.session.status === "paused"}
-          onClick={() => setActiveTab("focus")}
+          onClick={() => changeTab("focus")}
         />
       )}
       {activeTab === "today" && <TodayView />}
