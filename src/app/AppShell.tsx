@@ -3,6 +3,7 @@ import { FloatingWindow } from "../components/layout/FloatingWindow";
 import { TabBar } from "../components/layout/TabBar";
 import { TimerStrip } from "../components/layout/TimerStrip";
 import { FocusView } from "../features/focus/FocusView";
+import { useFocusSession } from "../features/focus/useFocusSession";
 import { HistoryView } from "../features/history/HistoryView";
 import { NotesView } from "../features/notes/NotesView";
 import { TodayView } from "../features/today/TodayView";
@@ -11,18 +12,23 @@ import type { AppTab } from "../types/domain";
 
 export function AppShell() {
   const [activeTab, setActiveTab] = useState<AppTab>("today");
-  const hasFocusSession = true;
+  const focus = useFocusSession();
 
   return (
     <FloatingWindow>
       <TabBar activeTab={activeTab} onChange={setActiveTab} />
-      {hasFocusSession && (
-        <TimerStrip title="整理组会提纲" elapsed="18:42" onClick={() => setActiveTab("focus")} />
+      {focus.session && (
+        <TimerStrip
+          title={focus.session.title}
+          elapsed={focus.elapsedText}
+          paused={focus.session.status === "paused"}
+          onClick={() => setActiveTab("focus")}
+        />
       )}
       {activeTab === "today" && <TodayView />}
       {activeTab === "week" && <WeekView />}
       {activeTab === "notes" && <NotesView />}
-      {activeTab === "focus" && <FocusView />}
+      {activeTab === "focus" && <FocusView focus={focus} />}
       {activeTab === "history" && <HistoryView />}
     </FloatingWindow>
   );
