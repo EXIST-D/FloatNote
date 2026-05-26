@@ -9,11 +9,8 @@
     "core:window:allow-show",
     "core:window:allow-set-always-on-top",
     "core:window:allow-set-position",
-    "core:window:allow-set-size",
     "core:window:allow-start-dragging",
-    "opener:default",
     "sql:default",
-    "sql:allow-execute",
-    "store:default"
+    "sql:allow-execute"
   ]
 }

@@ -12,6 +12,17 @@ function isAppTab(value: string | null): value is AppTab {
   return value === "today" || value === "week" || value === "notes" || value === "focus" || value === "history";
 }
 
+function parseWindowPosition(value: string | null) {
+  if (!value) return null;
+
+  try {
+    const position = JSON.parse(value) as Partial<{ x: unknown; y: unknown }>;
+    return typeof position.x === "number" && typeof position.y === "number" ? { x: position.x, y: position.y } : null;
+  } catch {
+    return null;
+  }
+}
+
 export function useSettings() {
   const [theme, setThemeState] = useState<ThemeName>("paper");
   const [alwaysOnTop, setAlwaysOnTopState] = useState(true);
@@ -38,8 +49,8 @@ export function useSettings() {
       const appWindow = getCurrentWindow();
       await appWindow.setAlwaysOnTop(nextAlwaysOnTop);
 
-      if (savedPosition) {
-        const position = JSON.parse(savedPosition) as { x: number; y: number };
+      const position = parseWindowPosition(savedPosition);
+      if (position) {
         await appWindow.setPosition(new PhysicalPosition(position.x, position.y));
       }
     }

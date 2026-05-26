@@ -8,8 +8,6 @@ use tauri::{
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_sql::Builder::default().build())
-        .plugin(tauri_plugin_store::Builder::default().build())
-        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let show_hide = MenuItem::with_id(app, "show_hide", "显示/隐藏", true, None::<&str>)?;
             let toggle_pin = MenuItem::with_id(app, "toggle_pin", "置顶/取消置顶", true, None::<&str>)?;

@@ -29,10 +29,12 @@ export function useFocusSession() {
     try {
       const active = await getActiveFocusSession();
       if (active?.status === "running") {
-        await pauseFocusSession(active.id, active.durationSeconds);
-        const paused = { ...active, status: "paused" as const };
+        const elapsed = computeElapsedSeconds(active);
+        const updatedAt = new Date().toISOString();
+        await pauseFocusSession(active.id, elapsed);
+        const paused = { ...active, status: "paused" as const, durationSeconds: elapsed, updatedAt };
         setSession(paused);
-        setElapsedSeconds(paused.durationSeconds);
+        setElapsedSeconds(elapsed);
       } else {
         setSession(active);
         setElapsedSeconds(computeElapsedSeconds(active));
