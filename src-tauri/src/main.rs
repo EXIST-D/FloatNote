@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    tmptauri_scaffold_lib::run()
+    desktop_note_lib::run()
 }
