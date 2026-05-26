@@ -40,3 +40,10 @@ export interface FocusSession {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface HistoryDayGroup {
+  date: string;
+  tasks: Task[];
+  notes: Note[];
+  focusSessions: FocusSession[];
+}
