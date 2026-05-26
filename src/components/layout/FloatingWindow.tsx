@@ -18,7 +18,7 @@ export function FloatingWindow({ children, theme, onThemeChange, alwaysOnTop, on
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
 
   return (
-    <main className="min-h-screen bg-transparent p-4">
+    <main className="bg-transparent">
       <section className="relative w-[360px] overflow-hidden rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--text-main)] shadow-[var(--shadow)]">
         <header
           data-tauri-drag-region

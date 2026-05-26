@@ -57,12 +57,14 @@
 html,
 body,
 #root {
-  min-height: 100vh;
+  width: fit-content;
+  height: fit-content;
 }
 
 body {
   margin: 0;
   min-width: 320px;
+  overflow: hidden;
   background: transparent;
 }
 
