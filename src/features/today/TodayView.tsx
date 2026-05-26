@@ -1,10 +1,10 @@
 import { PanelBody } from "../../components/layout/PanelBody";
+import { SortableTaskList } from "../tasks/SortableTaskList";
 import { TaskInput } from "./TaskInput";
-import { TaskList } from "./TaskList";
 import { useTodayTasks } from "./useTodayTasks";
 
 export function TodayView() {
-  const { tasks, loading, error, addTask, markDone, removeTask } = useTodayTasks();
+  const { tasks, loading, error, addTask, changeStatus, editTask, removeTask, changeOrder } = useTodayTasks();
 
   return (
     <PanelBody>
@@ -13,7 +13,14 @@ export function TodayView() {
       {loading ? (
         <p className="p-2 text-xs text-[var(--text-muted)]">正在读取今日任务...</p>
       ) : (
-        <TaskList tasks={tasks} emptyText="今天还没有任务" onComplete={markDone} onDelete={removeTask} />
+        <SortableTaskList
+          tasks={tasks}
+          emptyText="今天还没有任务"
+          onStatusChange={changeStatus}
+          onTitleChange={editTask}
+          onDelete={removeTask}
+          onReorder={changeOrder}
+        />
       )}
     </PanelBody>
   );

@@ -1,6 +1,10 @@
 export type AppTab = "today" | "week" | "notes" | "focus" | "history";
 
-export type ThemeName = "paper" | "ink" | "night";
+export type ThemeName = "paper" | "ink" | "night" | "book" | "reading" | "green";
+
+export type FontStyleName = "clear" | "bookish" | "compact";
+
+export type PaperOpacityName = "clear" | "soft" | "solid";
 
 export type TaskScope = "today" | "week";
 

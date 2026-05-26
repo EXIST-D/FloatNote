@@ -81,6 +81,8 @@ export async function completeFocusSession(id: string, durationSeconds: number) 
 
 export async function listFocusSessionsForHistory() {
   const db = await getDb();
-  const rows = await db.select<FocusRow[]>("SELECT * FROM focus_sessions ORDER BY COALESCE(ended_at, started_at) DESC");
+  const rows = await db.select<FocusRow[]>(
+    "SELECT * FROM focus_sessions WHERE status IN ('completed', 'canceled') ORDER BY COALESCE(ended_at, started_at) DESC",
+  );
   return rows.map(mapFocus);
 }

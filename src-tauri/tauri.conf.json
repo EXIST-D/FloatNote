@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "桌面便利贴",
+  "productName": "浮笺",
   "version": "0.1.0",
   "identifier": "com.codex.desktop-note",
   "build": {
@@ -12,10 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "桌面便利贴",
-        "width": 360,
-        "height": 320,
-        "resizable": false,
+        "title": "浮笺",
+        "width": 420,
+        "height": 360,
+        "minWidth": 320,
+        "minHeight": 260,
+        "preventOverflow": true,
+        "resizable": true,
         "decorations": false,
         "transparent": true,
         "shadow": false,
@@ -23,7 +26,7 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost data:; connect-src ipc: http://ipc.localhost"
     }
   },
   "bundle": {

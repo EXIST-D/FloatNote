@@ -1,14 +1,24 @@
-import { Trash2 } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
+import { Toast } from "../../components/common/Toast";
 import { PanelBody } from "../../components/layout/PanelBody";
+import type { Note, TaskScope } from "../../types/domain";
 import { useNotes } from "./useNotes";
 
 export function NotesView() {
-  const { notes, loading, error, addNote, removeNote } = useNotes();
+  const { notes, loading, error, addNote, convertNote, removeNote } = useNotes();
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!feedback) return;
+
+    const timeoutId = window.setTimeout(() => setFeedback(null), 1800);
+    return () => window.clearTimeout(timeoutId);
+  }, [feedback]);
 
   async function saveNote() {
     const nextContent = content.trim();
@@ -23,8 +33,13 @@ export function NotesView() {
     }
   }
 
+  async function convert(note: Note, scope: TaskScope) {
+    await convertNote(note, scope);
+    setFeedback(scope === "today" ? "已转为今日任务" : "已转为本周任务");
+  }
+
   return (
-    <PanelBody>
+    <PanelBody className="relative">
       <textarea
         value={content}
         onChange={(event) => setContent(event.currentTarget.value)}
@@ -34,7 +49,7 @@ export function NotesView() {
             void saveNote();
           }
         }}
-        className="min-h-16 resize-none rounded-md border border-[var(--app-border)] bg-white/45 p-2 text-sm leading-5 outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
+        className="min-h-20 resize-none rounded-md border border-[var(--app-border)] bg-white/45 p-2 text-sm leading-5 outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
         placeholder="记下一点灵感或随笔"
       />
       <button
@@ -51,17 +66,28 @@ export function NotesView() {
       ) : notes.length === 0 ? (
         <EmptyState title="还没有灵感记录" />
       ) : (
-        <div className="grid max-h-32 gap-1.5 overflow-auto pr-1">
+        <div className="grid min-h-0 gap-1.5 overflow-auto pr-1">
           {notes.map((note) => (
-            <article key={note.id} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-2 py-1.5 text-sm leading-5">
-              <p className="line-clamp-2 min-w-0 whitespace-pre-wrap">{note.content}</p>
-              <IconButton label="删除" onClick={() => void removeNote(note.id)}>
-                <Trash2 size={13} />
-              </IconButton>
+            <article key={note.id} className="grid min-w-0 gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-2 py-1.5 text-sm leading-5">
+              <p className="line-clamp-3 min-w-0 whitespace-pre-wrap break-words">{note.content}</p>
+              <div className="flex min-w-0 items-center justify-end gap-1">
+                <button type="button" className="note-action" onClick={() => void convert(note, "today")}>
+                  <ArrowRight size={12} />
+                  今日
+                </button>
+                <button type="button" className="note-action" onClick={() => void convert(note, "week")}>
+                  <ArrowRight size={12} />
+                  本周
+                </button>
+                <IconButton label="删除" onClick={() => void removeNote(note.id)}>
+                  <Trash2 size={13} />
+                </IconButton>
+              </div>
             </article>
           ))}
         </div>
       )}
+      <Toast message={feedback} />
     </PanelBody>
   );
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { completeTask, createTask, deleteTask, listTasks } from "../../data/tasksRepository";
-import type { Task } from "../../types/domain";
+import { createTask, deleteTask, listTasks, reorderTasks, updateTaskStatus, updateTaskTitle } from "../../data/tasksRepository";
+import type { Task, TaskStatus } from "../../types/domain";
 
 export function useTodayTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -28,8 +28,13 @@ export function useTodayTasks() {
     await reload();
   }
 
-  async function markDone(id: string) {
-    await completeTask(id);
+  async function changeStatus(id: string, status: TaskStatus) {
+    await updateTaskStatus(id, status);
+    await reload();
+  }
+
+  async function editTask(id: string, title: string) {
+    await updateTaskTitle(id, title);
     await reload();
   }
 
@@ -38,5 +43,10 @@ export function useTodayTasks() {
     await reload();
   }
 
-  return { tasks, loading, error, addTask, markDone, removeTask, reload };
+  async function changeOrder(nextTasks: Task[]) {
+    await reorderTasks(nextTasks);
+    await reload();
+  }
+
+  return { tasks, loading, error, addTask, changeStatus, editTask, removeTask, changeOrder, reload };
 }

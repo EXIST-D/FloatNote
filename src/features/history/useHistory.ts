@@ -25,7 +25,7 @@ function buildGroups(tasks: Task[], notes: Note[], focusSessions: FocusSession[]
   const groups = new Map<string, HistoryDayGroup>();
 
   for (const task of tasks) {
-    const date = toLocalDateKey(task.completedAt ?? task.createdAt);
+    const date = toLocalDateKey(task.completedAt ?? task.updatedAt ?? task.createdAt);
     ensureGroup(groups, date).tasks.push(task);
   }
 

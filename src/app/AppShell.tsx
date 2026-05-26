@@ -7,6 +7,7 @@ import { useFocusSession } from "../features/focus/useFocusSession";
 import { HistoryView } from "../features/history/HistoryView";
 import { NotesView } from "../features/notes/NotesView";
 import { useSettings } from "../features/settings/useSettings";
+import { useGlobalShortcut } from "../features/shortcuts/useGlobalShortcut";
 import { TodayView } from "../features/today/TodayView";
 import { WeekView } from "../features/week/WeekView";
 import type { AppTab } from "../types/domain";
@@ -15,6 +16,7 @@ export function AppShell() {
   const settings = useSettings();
   const [activeTab, setActiveTab] = useState<AppTab>(settings.lastActiveTab);
   const focus = useFocusSession();
+  const { shortcutError } = useGlobalShortcut();
 
   useEffect(() => {
     setActiveTab(settings.lastActiveTab);
@@ -29,8 +31,13 @@ export function AppShell() {
     <FloatingWindow
       theme={settings.theme}
       onThemeChange={(theme) => void settings.setTheme(theme)}
+      fontStyle={settings.fontStyle}
+      onFontStyleChange={(fontStyle) => void settings.setFontStyle(fontStyle)}
+      paperOpacity={settings.paperOpacity}
+      onPaperOpacityChange={(paperOpacity) => void settings.setPaperOpacity(paperOpacity)}
       alwaysOnTop={settings.alwaysOnTop}
       onAlwaysOnTopChange={(value) => void settings.setAlwaysOnTop(value)}
+      toastMessage={shortcutError}
     >
       <TabBar activeTab={activeTab} onChange={changeTab} />
       {focus.session && (

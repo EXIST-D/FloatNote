@@ -1,5 +1,6 @@
 import type { Task, TaskScope, TaskStatus } from "../types/domain";
 import { getDb } from "./db";
+import { noteToTaskTitle } from "../features/notes/noteToTaskTitle";
 
 interface TaskRow {
   id: string;
@@ -78,6 +79,26 @@ export async function completeTask(id: string) {
   await db.execute("UPDATE tasks SET status = 'done', completed_at = $1, updated_at = $1 WHERE id = $2", [now, id]);
 }
 
+export async function updateTaskStatus(id: string, status: TaskStatus) {
+  const db = await getDb();
+  const now = new Date().toISOString();
+  const completedAt = status === "done" ? now : null;
+  await db.execute("UPDATE tasks SET status = $1, completed_at = $2, updated_at = $3 WHERE id = $4", [status, completedAt, now, id]);
+}
+
+export async function reorderTasks(tasks: Task[]) {
+  const db = await getDb();
+  const now = new Date().toISOString();
+
+  for (const task of tasks) {
+    await db.execute("UPDATE tasks SET sort_order = $1, updated_at = $2 WHERE id = $3", [task.sortOrder, now, task.id]);
+  }
+}
+
+export async function createTaskFromNote(scope: TaskScope, content: string) {
+  return createTask(scope, noteToTaskTitle(content));
+}
+
 export async function deleteTask(id: string) {
   const db = await getDb();
   await db.execute("DELETE FROM tasks WHERE id = $1", [id]);
@@ -85,7 +106,9 @@ export async function deleteTask(id: string) {
 
 export async function listTasksForHistory() {
   const db = await getDb();
-  const rows = await db.select<TaskRow[]>("SELECT * FROM tasks ORDER BY COALESCE(completed_at, created_at) DESC");
+  const rows = await db.select<TaskRow[]>(
+    "SELECT * FROM tasks WHERE status IN ('done', 'archived') ORDER BY COALESCE(completed_at, updated_at, created_at) DESC",
+  );
   return rows.map(mapTask);
 }
 

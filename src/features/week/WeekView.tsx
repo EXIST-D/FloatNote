@@ -1,10 +1,10 @@
 import { PanelBody } from "../../components/layout/PanelBody";
+import { SortableTaskList } from "../tasks/SortableTaskList";
 import { TaskInput } from "../today/TaskInput";
-import { TaskList } from "../today/TaskList";
 import { useWeekTasks } from "./useWeekTasks";
 
 export function WeekView() {
-  const { tasks, loading, error, addTask, markDone, removeTask } = useWeekTasks();
+  const { tasks, loading, error, addTask, changeStatus, editTask, removeTask, changeOrder } = useWeekTasks();
 
   return (
     <PanelBody>
@@ -13,7 +13,14 @@ export function WeekView() {
       {loading ? (
         <p className="p-2 text-xs text-[var(--text-muted)]">正在读取本周任务...</p>
       ) : (
-        <TaskList tasks={tasks} emptyText="本周还没有任务" onComplete={markDone} onDelete={removeTask} />
+        <SortableTaskList
+          tasks={tasks}
+          emptyText="本周还没有任务"
+          onStatusChange={changeStatus}
+          onTitleChange={editTask}
+          onDelete={removeTask}
+          onReorder={changeOrder}
+        />
       )}
     </PanelBody>
   );

@@ -7,9 +7,17 @@
     "core:default",
     "core:window:allow-hide",
     "core:window:allow-show",
+    "core:window:allow-is-focused",
+    "core:window:allow-is-visible",
+    "core:window:allow-primary-monitor",
     "core:window:allow-set-always-on-top",
+    "core:window:allow-set-focus",
     "core:window:allow-set-position",
+    "core:window:allow-set-size",
     "core:window:allow-start-dragging",
+    "global-shortcut:allow-is-registered",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister",
     "sql:default",
     "sql:allow-execute"
   ]
