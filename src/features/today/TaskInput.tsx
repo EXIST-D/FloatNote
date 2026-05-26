@@ -25,11 +25,11 @@ export function TaskInput({ placeholder, onSubmit }: TaskInputProps) {
   }
 
   return (
-    <form className="flex gap-1.5" onSubmit={handleSubmit}>
+    <form className="flex min-w-0 gap-1.5" onSubmit={handleSubmit}>
       <input
         value={title}
         onChange={(event) => setTitle(event.currentTarget.value)}
-        className="h-8 min-w-0 flex-1 rounded-md border border-[var(--app-border)] bg-white/45 px-2.5 text-sm outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
+        className="h-8 min-w-0 flex-1 rounded-md border border-[var(--app-border)] bg-white/45 px-2 text-sm outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
         placeholder={placeholder}
       />
       <button

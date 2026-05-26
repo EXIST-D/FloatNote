@@ -30,8 +30,8 @@ export function FloatingWindow({ children, theme, onThemeChange, alwaysOnTop, on
       window.cancelAnimationFrame(frameId);
       frameId = window.requestAnimationFrame(() => {
         const rect = element.getBoundingClientRect();
-        const width = Math.ceil(rect.width + 2);
-        const height = Math.ceil(rect.height + 2);
+        const width = 322;
+        const height = Math.min(Math.max(Math.ceil(rect.height + 2), 180), 420);
         void appWindow.setSize(new PhysicalSize(width, height));
       });
     };
@@ -50,13 +50,13 @@ export function FloatingWindow({ children, theme, onThemeChange, alwaysOnTop, on
     <main className="bg-transparent">
       <section
         ref={windowRef}
-        className="relative w-[340px] overflow-hidden rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--text-main)] shadow-[var(--shadow)]"
+        className="relative w-[320px] overflow-hidden rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--text-main)] shadow-[var(--shadow)]"
       >
         <header
           data-tauri-drag-region
-          className="flex h-8 items-center justify-between border-b border-[var(--app-border)] bg-[var(--drag-bg)] px-2.5"
+          className="flex h-8 items-center justify-between border-b border-[var(--app-border)] bg-[var(--drag-bg)] px-2"
         >
-          <h1 className="text-sm font-semibold tracking-normal">桌面便利贴</h1>
+          <h1 className="min-w-0 truncate text-sm font-semibold tracking-normal">桌面便利贴</h1>
           <div className="flex items-center gap-1">
             <IconButton
               label={alwaysOnTop ? "取消置顶" : "置顶"}

@@ -2,6 +2,7 @@ import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
+import { PanelBody } from "../../components/layout/PanelBody";
 import { useNotes } from "./useNotes";
 
 export function NotesView() {
@@ -23,7 +24,7 @@ export function NotesView() {
   }
 
   return (
-    <section className="grid gap-2 p-2">
+    <PanelBody>
       <textarea
         value={content}
         onChange={(event) => setContent(event.currentTarget.value)}
@@ -33,7 +34,7 @@ export function NotesView() {
             void saveNote();
           }
         }}
-        className="min-h-20 resize-none rounded-md border border-[var(--app-border)] bg-white/45 p-2 text-sm leading-5 outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
+        className="min-h-16 resize-none rounded-md border border-[var(--app-border)] bg-white/45 p-2 text-sm leading-5 outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
         placeholder="记下一点灵感或随笔"
       />
       <button
@@ -50,10 +51,10 @@ export function NotesView() {
       ) : notes.length === 0 ? (
         <EmptyState title="还没有灵感记录" />
       ) : (
-        <div className="grid max-h-36 gap-1.5 overflow-auto pr-1">
+        <div className="grid max-h-32 gap-1.5 overflow-auto pr-1">
           {notes.map((note) => (
-            <article key={note.id} className="grid grid-cols-[1fr_auto] gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-2 py-1.5 text-sm leading-5">
-              <p className="line-clamp-3 whitespace-pre-wrap">{note.content}</p>
+            <article key={note.id} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-2 py-1.5 text-sm leading-5">
+              <p className="line-clamp-2 min-w-0 whitespace-pre-wrap">{note.content}</p>
               <IconButton label="删除" onClick={() => void removeNote(note.id)}>
                 <Trash2 size={13} />
               </IconButton>
@@ -61,6 +62,6 @@ export function NotesView() {
           ))}
         </div>
       )}
-    </section>
+    </PanelBody>
   );
 }

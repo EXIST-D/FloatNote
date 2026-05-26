@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PanelBody } from "../../components/layout/PanelBody";
 import type { useFocusSession } from "./useFocusSession";
 
 type FocusController = ReturnType<typeof useFocusSession>;
@@ -12,16 +13,16 @@ export function FocusView({ focus }: FocusViewProps) {
   const { session, elapsedText, loading, error, start, pause, resume, complete } = focus;
 
   return (
-    <section className="grid gap-2 p-2">
-      <div className="rounded-md bg-[var(--accent)] p-3 text-[var(--accent-contrast)]">
+    <PanelBody className="max-h-[250px]">
+      <div className="min-w-0 rounded-md bg-[var(--accent)] p-2.5 text-[var(--accent-contrast)]">
         <p className="text-xs">{session ? (session.status === "paused" ? "已暂停" : "当前专注") : "尚未开始"}</p>
-        <strong className="mt-1 block text-3xl tabular-nums">{elapsedText}</strong>
-        <p className="mt-1 truncate text-sm">{session?.title ?? "给正在做的事起个名字"}</p>
+        <strong className="mt-0.5 block text-2xl leading-tight tabular-nums">{elapsedText}</strong>
+        <p className="mt-0.5 truncate text-xs">{session?.title ?? "给正在做的事起个名字"}</p>
       </div>
       {error && <p className="rounded-md bg-red-50 p-2 text-xs text-red-700">{error}</p>}
       {!session && (
         <form
-          className="grid gap-1.5"
+          className="grid min-w-0 gap-1.5"
           onSubmit={(event) => {
             event.preventDefault();
             void start(title);
@@ -31,7 +32,7 @@ export function FocusView({ focus }: FocusViewProps) {
           <input
             value={title}
             onChange={(event) => setTitle(event.currentTarget.value)}
-            className="h-8 rounded-md border border-[var(--app-border)] bg-white/45 px-2.5 text-sm outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
+            className="h-8 min-w-0 rounded-md border border-[var(--app-border)] bg-white/45 px-2 text-sm outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
             placeholder="现在要专注什么"
           />
           <button
@@ -63,6 +64,6 @@ export function FocusView({ focus }: FocusViewProps) {
           </button>
         </div>
       )}
-    </section>
+    </PanelBody>
   );
 }

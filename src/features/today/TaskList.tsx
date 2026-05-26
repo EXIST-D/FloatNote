@@ -16,11 +16,11 @@ export function TaskList({ tasks, emptyText, onComplete, onDelete }: TaskListPro
   }
 
   return (
-    <div className="grid max-h-40 gap-1.5 overflow-auto pr-1">
+    <div className="grid max-h-36 gap-1.5 overflow-auto pr-1">
       {tasks.map((task) => (
         <article
           key={task.id}
-          className={`grid min-h-8 grid-cols-[auto_1fr_auto] items-center gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-2 py-1 text-sm ${
+          className={`grid min-h-8 min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-2 py-1 text-sm ${
             task.status === "done" ? "text-[var(--text-muted)] opacity-70" : "text-[var(--text-main)]"
           }`}
         >
