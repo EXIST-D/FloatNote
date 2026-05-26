@@ -7,7 +7,7 @@ export function HistoryView() {
   const { groups, loading, error } = useHistory();
 
   return (
-    <PanelBody className="max-h-[310px]">
+    <PanelBody>
       {error && <p className="rounded-md bg-red-50 p-2 text-xs text-red-700">{error}</p>}
       {loading ? (
         <p className="p-2 text-xs text-[var(--text-muted)]">正在读取历史...</p>

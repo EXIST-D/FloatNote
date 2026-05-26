@@ -13,11 +13,12 @@
     "windows": [
       {
         "title": "桌面便利贴",
-        "width": 322,
-        "height": 220,
+        "width": 360,
+        "height": 320,
         "resizable": false,
         "decorations": false,
         "transparent": true,
+        "shadow": false,
         "alwaysOnTop": true
       }
     ],

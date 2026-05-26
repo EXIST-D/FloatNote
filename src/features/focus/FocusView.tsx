@@ -13,7 +13,7 @@ export function FocusView({ focus }: FocusViewProps) {
   const { session, elapsedText, loading, error, start, pause, resume, complete } = focus;
 
   return (
-    <PanelBody className="max-h-[250px]">
+    <PanelBody>
       <div className="min-w-0 rounded-md bg-[var(--accent)] p-2.5 text-[var(--accent-contrast)]">
         <p className="text-xs">{session ? (session.status === "paused" ? "已暂停" : "当前专注") : "尚未开始"}</p>
         <strong className="mt-0.5 block text-2xl leading-tight tabular-nums">{elapsedText}</strong>

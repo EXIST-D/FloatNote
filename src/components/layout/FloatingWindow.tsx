@@ -1,8 +1,7 @@
-import { PhysicalSize } from "@tauri-apps/api/dpi";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Minus, Pin, Settings, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { ThemeName } from "../../types/domain";
 import { IconButton } from "../common/IconButton";
 import { ThemeMenu } from "../theme/ThemeMenu";
@@ -17,40 +16,11 @@ interface FloatingWindowProps {
 
 export function FloatingWindow({ children, theme, onThemeChange, alwaysOnTop, onAlwaysOnTopChange }: FloatingWindowProps) {
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
-  const windowRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const element = windowRef.current;
-    if (!element) return;
-
-    const appWindow = getCurrentWindow();
-    let frameId = 0;
-
-    const resizeToContent = () => {
-      window.cancelAnimationFrame(frameId);
-      frameId = window.requestAnimationFrame(() => {
-        const rect = element.getBoundingClientRect();
-        const width = 322;
-        const height = Math.min(Math.max(Math.ceil(rect.height + 2), 180), 420);
-        void appWindow.setSize(new PhysicalSize(width, height));
-      });
-    };
-
-    const observer = new ResizeObserver(resizeToContent);
-    observer.observe(element);
-    resizeToContent();
-
-    return () => {
-      window.cancelAnimationFrame(frameId);
-      observer.disconnect();
-    };
-  }, []);
 
   return (
-    <main className="bg-transparent">
+    <main className="h-screen w-screen overflow-hidden bg-transparent">
       <section
-        ref={windowRef}
-        className="relative w-[320px] overflow-hidden rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--text-main)] shadow-[var(--shadow)]"
+        className="relative flex h-full w-full flex-col overflow-hidden rounded-lg border border-[var(--app-border)] bg-[var(--app-bg)] text-[var(--text-main)]"
       >
         <header
           data-tauri-drag-region

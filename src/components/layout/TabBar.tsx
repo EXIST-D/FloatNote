@@ -8,7 +8,7 @@ interface TabBarProps {
 
 export function TabBar({ activeTab, onChange }: TabBarProps) {
   return (
-    <nav className="grid grid-cols-5 gap-0.5 bg-white/25 p-1" aria-label="主导航">
+    <nav className="grid shrink-0 grid-cols-5 gap-0.5 bg-white/25 p-1" aria-label="主导航">
       {tabs.map((tab) => (
         <button
           key={tab.id}
