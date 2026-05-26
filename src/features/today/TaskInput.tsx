@@ -25,21 +25,21 @@ export function TaskInput({ placeholder, onSubmit }: TaskInputProps) {
   }
 
   return (
-    <form className="flex gap-2" onSubmit={handleSubmit}>
+    <form className="flex gap-1.5" onSubmit={handleSubmit}>
       <input
         value={title}
         onChange={(event) => setTitle(event.currentTarget.value)}
-        className="h-10 min-w-0 flex-1 rounded-md border border-[var(--app-border)] bg-white/45 px-3 text-sm outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
+        className="h-8 min-w-0 flex-1 rounded-md border border-[var(--app-border)] bg-white/45 px-2.5 text-sm outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
         placeholder={placeholder}
       />
       <button
         type="submit"
-        className="grid h-10 w-10 place-items-center rounded-md bg-[var(--accent)] text-[var(--accent-contrast)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="grid h-8 w-8 place-items-center rounded-md bg-[var(--accent)] text-[var(--accent-contrast)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         disabled={saving || !title.trim()}
-        aria-label="新增任务"
-        title="新增任务"
+        aria-label="新增"
+        title="新增"
       >
-        <Plus size={17} />
+        <Plus size={15} />
       </button>
     </form>
   );

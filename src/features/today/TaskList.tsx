@@ -16,28 +16,28 @@ export function TaskList({ tasks, emptyText, onComplete, onDelete }: TaskListPro
   }
 
   return (
-    <div className="grid gap-2">
+    <div className="grid max-h-40 gap-1.5 overflow-auto pr-1">
       {tasks.map((task) => (
         <article
           key={task.id}
-          className={`grid grid-cols-[auto_1fr_auto] items-center gap-2 rounded-md border border-[var(--app-border)] bg-white/30 p-2 text-sm ${
+          className={`grid min-h-8 grid-cols-[auto_1fr_auto] items-center gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-2 py-1 text-sm ${
             task.status === "done" ? "text-[var(--text-muted)] opacity-70" : "text-[var(--text-main)]"
           }`}
         >
           <button
             type="button"
-            className={`grid h-5 w-5 place-items-center rounded border border-[var(--app-border)] ${
+            className={`grid h-4 w-4 place-items-center rounded border border-[var(--app-border)] ${
               task.status === "done" ? "bg-[var(--accent)] text-[var(--accent-contrast)]" : "bg-white/40"
             }`}
             onClick={() => task.status === "active" && onComplete(task.id)}
-            aria-label={task.status === "done" ? "已完成" : "完成任务"}
-            title={task.status === "done" ? "已完成" : "完成任务"}
+            aria-label={task.status === "done" ? "已完成" : "完成"}
+            title={task.status === "done" ? "已完成" : "完成"}
           >
-            {task.status === "done" && <Check size={13} />}
+            {task.status === "done" && <Check size={11} />}
           </button>
-          <span className={task.status === "done" ? "line-through" : ""}>{task.title}</span>
-          <IconButton label="删除任务" onClick={() => onDelete(task.id)}>
-            <Trash2 size={14} />
+          <span className={`min-w-0 truncate ${task.status === "done" ? "line-through" : ""}`}>{task.title}</span>
+          <IconButton label="删除" onClick={() => onDelete(task.id)}>
+            <Trash2 size={13} />
           </IconButton>
         </article>
       ))}

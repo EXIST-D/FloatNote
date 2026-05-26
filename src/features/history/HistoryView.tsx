@@ -6,21 +6,21 @@ export function HistoryView() {
   const { groups, loading, error } = useHistory();
 
   return (
-    <section className="grid gap-3 p-3">
+    <section className="grid gap-2 p-2">
       {error && <p className="rounded-md bg-red-50 p-2 text-xs text-red-700">{error}</p>}
       {loading ? (
-        <p className="p-2 text-sm text-[var(--text-muted)]">正在读取历史...</p>
+        <p className="p-2 text-xs text-[var(--text-muted)]">正在读取历史...</p>
       ) : groups.length === 0 ? (
         <EmptyState title="还没有历史记录" />
       ) : (
-        <div className="grid max-h-80 gap-3 overflow-auto pr-1">
+        <div className="grid max-h-48 gap-2 overflow-auto pr-1">
           {groups.map((group) => (
-            <article key={group.date} className="rounded-md border border-[var(--app-border)] bg-white/25 p-3">
+            <article key={group.date} className="rounded-md border border-[var(--app-border)] bg-white/25 p-2">
               <h2 className="text-sm font-semibold">{group.date}</h2>
               {group.tasks.length > 0 && (
-                <section className="mt-3">
+                <section className="mt-2">
                   <h3 className="text-xs text-[var(--text-muted)]">任务</h3>
-                  <ul className="mt-1 grid gap-1 text-sm">
+                  <ul className="mt-1 grid gap-0.5 text-sm">
                     {group.tasks.map((task) => (
                       <li key={task.id} className={task.status === "done" ? "text-[var(--text-muted)] line-through" : ""}>
                         {task.title}
@@ -30,11 +30,11 @@ export function HistoryView() {
                 </section>
               )}
               {group.notes.length > 0 && (
-                <section className="mt-3">
+                <section className="mt-2">
                   <h3 className="text-xs text-[var(--text-muted)]">灵感</h3>
-                  <ul className="mt-1 grid gap-1 text-sm">
+                  <ul className="mt-1 grid gap-0.5 text-sm">
                     {group.notes.map((note) => (
-                      <li key={note.id} className="whitespace-pre-wrap">
+                      <li key={note.id} className="line-clamp-2 whitespace-pre-wrap">
                         {note.content}
                       </li>
                     ))}
@@ -42,9 +42,9 @@ export function HistoryView() {
                 </section>
               )}
               {group.focusSessions.length > 0 && (
-                <section className="mt-3">
+                <section className="mt-2">
                   <h3 className="text-xs text-[var(--text-muted)]">专注</h3>
-                  <ul className="mt-1 grid gap-1 text-sm">
+                  <ul className="mt-1 grid gap-0.5 text-sm">
                     {group.focusSessions.map((session) => (
                       <li key={session.id} className="flex justify-between gap-3">
                         <span>{session.title}</span>
