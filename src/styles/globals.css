@@ -114,7 +114,7 @@
 }
 
 :root[data-font-style="bookish"] {
-  --font-body: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+  --font-body: "KaiTi", "STKaiti", "FangSong", "Microsoft YaHei", serif;
   --font-title: "KaiTi", "STKaiti", "FangSong", "Microsoft YaHei", serif;
   --note-text-size: 14px;
   --note-line-height: 1.65;
@@ -297,8 +297,8 @@ button {
   grid-template-columns: 188px minmax(0, 1fr);
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgb(255 255 255 / 0.62), rgb(255 255 255 / 0.28)),
-    #f7f0dc;
+    linear-gradient(90deg, rgb(255 255 255 / 0.84), rgb(255 255 255 / 0.52)),
+    #fbfaf6;
   color: #2f2a20;
   font-family: var(--font-body);
 }
@@ -320,7 +320,8 @@ button {
   min-height: 0;
   grid-template-rows: auto 1fr;
   gap: 18px;
-  border-right: 1px solid rgb(77 66 43 / 0.14);
+  border-right: 1px solid rgb(77 66 43 / 0.1);
+  background: rgb(255 255 255 / 0.52);
   padding: 22px 18px;
 }
 
@@ -329,6 +330,28 @@ button {
   min-width: 0;
   align-items: center;
   gap: 10px;
+}
+
+.dashboard-float-button {
+  margin-left: auto;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid rgb(77 66 43 / 0.12);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.66);
+  color: rgb(47 42 32 / 0.66);
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.dashboard-float-button:hover {
+  background: #ffffff;
+  color: #2f5a4f;
+  transform: translateY(-1px);
 }
 
 .dashboard-brand-mark {
@@ -393,6 +416,7 @@ button {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  background: #fbfaf6;
   padding: 22px;
 }
 
@@ -405,7 +429,7 @@ button {
 .dashboard-content > section:not(.dashboard-page) {
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.42);
+  background: rgb(255 255 255 / 0.72);
 }
 
 .dashboard-page {
@@ -431,8 +455,8 @@ button {
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
   background:
-    linear-gradient(135deg, rgb(255 255 255 / 0.82), rgb(255 255 255 / 0.4)),
-    linear-gradient(90deg, rgb(214 164 65 / 0.18), transparent);
+    linear-gradient(135deg, rgb(255 255 255 / 0.92), rgb(255 255 255 / 0.72)),
+    linear-gradient(90deg, rgb(214 164 65 / 0.08), transparent);
   padding: 20px 22px;
 }
 
@@ -474,7 +498,7 @@ button {
   overflow: hidden;
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.52);
+  background: rgb(255 255 255 / 0.76);
   padding: 16px;
   text-align: left;
 }
@@ -554,7 +578,7 @@ button {
   gap: 12px;
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.44);
+  background: rgb(255 255 255 / 0.76);
   padding: 12px 16px;
   text-align: left;
 }

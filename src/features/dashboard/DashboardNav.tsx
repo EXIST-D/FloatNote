@@ -1,4 +1,5 @@
-import { BarChart3, CalendarDays, Clock3, Home, Lightbulb, ListTodo, Settings, Sparkles } from "lucide-react";
+import { BarChart3, CalendarDays, Clock3, Home, Lightbulb, ListTodo, PanelTopOpen, Settings, Sparkles } from "lucide-react";
+import { openFloatingWindow } from "./useDashboardWindow";
 import type { DashboardTab } from "../../types/domain";
 
 interface DashboardNavProps {
@@ -27,6 +28,9 @@ export function DashboardNav({ activeTab, onChange }: DashboardNavProps) {
           <strong>浮笺</strong>
           <span>中文桌面工作台</span>
         </div>
+        <button type="button" className="dashboard-float-button" onClick={() => void openFloatingWindow()} aria-label="打开浮窗" title="打开浮窗">
+          <PanelTopOpen size={17} />
+        </button>
       </div>
       <nav className="dashboard-nav-list" aria-label="主窗口导航">
         {navItems.map((item) => {

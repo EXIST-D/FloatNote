@@ -1,4 +1,5 @@
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useEffect, useState } from "react";
 import { getSetting, setSetting } from "../data/settingsRepository";
 import { DashboardHome } from "../features/dashboard/DashboardHome";
@@ -23,6 +24,15 @@ export function DashboardShell() {
   const [activeTab, setActiveTab] = useState<DashboardTab>("home");
 
   useEffect(() => {
+    const appWindow = getCurrentWindow();
+    let unlistenClose: (() => void) | undefined;
+    appWindow.onCloseRequested((event) => {
+      event.preventDefault();
+      void appWindow.hide();
+    }).then((fn) => {
+      unlistenClose = fn;
+    });
+
     void getSetting("dashboard_active_tab").then((value) => {
       if (isDashboardTab(value)) setActiveTab(value);
     });
@@ -33,7 +43,10 @@ export function DashboardShell() {
     }).then((fn) => {
       unlisten = fn;
     });
-    return () => unlisten?.();
+    return () => {
+      unlisten?.();
+      unlistenClose?.();
+    };
   }, []);
 
   function changeTab(tab: DashboardTab) {
