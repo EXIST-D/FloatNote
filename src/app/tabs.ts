@@ -10,5 +10,4 @@ export const tabs: TabDefinition[] = [
   { id: "week", label: "本周" },
   { id: "notes", label: "灵感" },
   { id: "focus", label: "专注" },
-  { id: "history", label: "历史" },
 ];

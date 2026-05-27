@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { createTask, deleteTask, listTasks, reorderTasks, updateTaskStatus, updateTaskTitle } from "../../data/tasksRepository";
-import type { Task, TaskStatus } from "../../types/domain";
+import { createTask, deleteTask, listTasks, reorderTasks, updateTaskPriority, updateTaskStatus, updateTaskTitle } from "../../data/tasksRepository";
+import type { Task, TaskPriority, TaskStatus } from "../../types/domain";
 
 export function useWeekTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -38,6 +38,11 @@ export function useWeekTasks() {
     await reload();
   }
 
+  async function changePriority(id: string, priority: TaskPriority) {
+    await updateTaskPriority(id, priority);
+    await reload();
+  }
+
   async function removeTask(id: string) {
     await deleteTask(id);
     await reload();
@@ -48,5 +53,5 @@ export function useWeekTasks() {
     await reload();
   }
 
-  return { tasks, loading, error, addTask, changeStatus, editTask, removeTask, changeOrder, reload };
+  return { tasks, loading, error, addTask, changeStatus, editTask, changePriority, removeTask, changeOrder, reload };
 }

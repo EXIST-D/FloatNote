@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "label": "main",
         "title": "浮笺",
         "width": 420,
         "height": 360,
@@ -23,6 +24,20 @@
         "transparent": true,
         "shadow": false,
         "alwaysOnTop": true
+      },
+      {
+        "label": "dashboard",
+        "title": "浮笺工作台",
+        "width": 1100,
+        "height": 760,
+        "minWidth": 860,
+        "minHeight": 560,
+        "preventOverflow": true,
+        "resizable": true,
+        "decorations": true,
+        "transparent": false,
+        "visible": false,
+        "alwaysOnTop": false
       }
     ],
     "security": {

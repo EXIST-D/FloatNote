@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "../../types/domain";
-import { buildReorderedTasks } from "./taskOrdering";
+import { buildReorderedTasks, getTopInsertSortOrder } from "./taskOrdering";
 
 function makeTask(id: string, sortOrder: number): Task {
   return {
@@ -8,6 +8,7 @@ function makeTask(id: string, sortOrder: number): Task {
     scope: "today",
     title: id,
     status: "active",
+    priority: "medium",
     sortOrder,
     plannedDate: "2026-05-27",
     weekKey: null,
@@ -42,5 +43,15 @@ describe("buildReorderedTasks", () => {
       ["a", 1],
       ["b", 2],
     ]);
+  });
+});
+
+describe("getTopInsertSortOrder", () => {
+  it("returns 0 for an empty list", () => {
+    expect(getTopInsertSortOrder([])).toBe(0);
+  });
+
+  it("creates a sort order before the current first item", () => {
+    expect(getTopInsertSortOrder([makeTask("a", 3), makeTask("b", 8)])).toBe(2);
   });
 });

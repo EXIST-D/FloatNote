@@ -3,12 +3,16 @@ import { getCurrentWindow, primaryMonitor } from "@tauri-apps/api/window";
 import { useCallback, useEffect, useState } from "react";
 import {
   getSetting,
+  getPriorityColors,
+  isMainWindowStyle,
   isWindowPositionSetting,
   isWindowSizeSetting,
   parseJsonSetting,
+  setPriorityColors as savePriorityColors,
   setSetting,
 } from "../../data/settingsRepository";
-import type { AppTab, FontStyleName, PaperOpacityName, ThemeName } from "../../types/domain";
+import { priorityColorsToCssVars } from "../tasks/taskPriority";
+import type { AppTab, FontStyleName, MainWindowStyle, PaperOpacityName, TaskPriority, ThemeName } from "../../types/domain";
 
 function isThemeName(value: string | null): value is ThemeName {
   return value === "paper" || value === "ink" || value === "night" || value === "book" || value === "reading" || value === "green";
@@ -23,13 +27,24 @@ function isPaperOpacityName(value: string | null): value is PaperOpacityName {
 }
 
 function isAppTab(value: string | null): value is AppTab {
-  return value === "today" || value === "week" || value === "notes" || value === "focus" || value === "history";
+  return value === "today" || value === "week" || value === "notes" || value === "focus";
 }
 
-function applyAppearance(theme: ThemeName, fontStyle: FontStyleName, paperOpacity: PaperOpacityName) {
+function applyAppearance(
+  theme: ThemeName,
+  fontStyle: FontStyleName,
+  paperOpacity: PaperOpacityName,
+  priorityColors?: Record<TaskPriority, string>,
+) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.dataset.fontStyle = fontStyle;
   document.documentElement.dataset.paperOpacity = paperOpacity;
+  if (priorityColors) {
+    const vars = priorityColorsToCssVars(priorityColors);
+    for (const [key, value] of Object.entries(vars)) {
+      document.documentElement.style.setProperty(key, String(value));
+    }
+  }
 }
 
 async function clampPositionToWorkArea(position: { x: number; y: number }, size: { width: number; height: number }) {
@@ -48,16 +63,36 @@ async function clampPositionToWorkArea(position: { x: number; y: number }, size:
   };
 }
 
-export function useSettings() {
+interface UseSettingsOptions {
+  manageFloatingWindow?: boolean;
+}
+
+export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions = {}) {
   const [theme, setThemeState] = useState<ThemeName>("paper");
   const [fontStyle, setFontStyleState] = useState<FontStyleName>("clear");
   const [paperOpacity, setPaperOpacityState] = useState<PaperOpacityName>("solid");
+  const [mainWindowStyle, setMainWindowStyleState] = useState<MainWindowStyle>("desk");
+  const [priorityColors, setPriorityColorsState] = useState<Record<TaskPriority, string>>({
+    high: "#c95742",
+    medium: "#d6a441",
+    low: "#4f8b6c",
+  });
   const [alwaysOnTop, setAlwaysOnTopState] = useState(true);
   const [lastActiveTab, setLastActiveTabState] = useState<AppTab>("today");
 
   useEffect(() => {
     async function load() {
-      const [savedTheme, savedFontStyle, savedPaperOpacity, savedAlwaysOnTop, savedTab, savedPosition, savedSize] = await Promise.all([
+      const [
+        savedTheme,
+        savedFontStyle,
+        savedPaperOpacity,
+        savedAlwaysOnTop,
+        savedTab,
+        savedPosition,
+        savedSize,
+        savedMainWindowStyle,
+        savedPriorityColors,
+      ] = await Promise.all([
         getSetting("theme"),
         getSetting("font_style"),
         getSetting("paper_opacity"),
@@ -65,6 +100,8 @@ export function useSettings() {
         getSetting("last_active_tab"),
         getSetting("window_position"),
         getSetting("window_size"),
+        getSetting("main_window_style"),
+        getPriorityColors(),
       ]);
 
       const nextTheme = isThemeName(savedTheme) ? savedTheme : "paper";
@@ -72,33 +109,40 @@ export function useSettings() {
       const nextPaperOpacity = isPaperOpacityName(savedPaperOpacity) ? savedPaperOpacity : "solid";
       const nextAlwaysOnTop = savedAlwaysOnTop === null ? true : savedAlwaysOnTop === "true";
       const nextTab = isAppTab(savedTab) ? savedTab : "today";
+      const nextMainWindowStyle = isMainWindowStyle(savedMainWindowStyle) ? savedMainWindowStyle : "desk";
 
       setThemeState(nextTheme);
       setFontStyleState(nextFontStyle);
       setPaperOpacityState(nextPaperOpacity);
+      setMainWindowStyleState(nextMainWindowStyle);
+      setPriorityColorsState(savedPriorityColors);
       setAlwaysOnTopState(nextAlwaysOnTop);
       setLastActiveTabState(nextTab);
-      applyAppearance(nextTheme, nextFontStyle, nextPaperOpacity);
+      applyAppearance(nextTheme, nextFontStyle, nextPaperOpacity, savedPriorityColors);
 
-      const appWindow = getCurrentWindow();
-      await appWindow.setAlwaysOnTop(nextAlwaysOnTop);
+      if (manageFloatingWindow) {
+        const appWindow = getCurrentWindow();
+        await appWindow.setAlwaysOnTop(nextAlwaysOnTop);
 
-      const size = parseJsonSetting(savedSize, isWindowSizeSetting) ?? { width: 420, height: 360 };
-      if (size) {
-        await appWindow.setSize(new PhysicalSize(size.width, size.height));
-      }
+        const size = parseJsonSetting(savedSize, isWindowSizeSetting) ?? { width: 420, height: 360 };
+        if (size) {
+          await appWindow.setSize(new PhysicalSize(size.width, size.height));
+        }
 
-      const position = parseJsonSetting(savedPosition, isWindowPositionSetting);
-      if (position) {
-        const safePosition = await clampPositionToWorkArea(position, size);
-        await appWindow.setPosition(new PhysicalPosition(safePosition.x, safePosition.y));
+        const position = parseJsonSetting(savedPosition, isWindowPositionSetting);
+        if (position) {
+          const safePosition = await clampPositionToWorkArea(position, size);
+          await appWindow.setPosition(new PhysicalPosition(safePosition.x, safePosition.y));
+        }
       }
     }
 
     void load();
-  }, []);
+  }, [manageFloatingWindow]);
 
   useEffect(() => {
+    if (!manageFloatingWindow) return;
+
     const appWindow = getCurrentWindow();
     let moveTimeoutId: number | undefined;
     let resizeTimeoutId: number | undefined;
@@ -129,34 +173,45 @@ export function useSettings() {
       unlistenMoved?.();
       unlistenResized?.();
     };
-  }, []);
+  }, [manageFloatingWindow]);
 
   const setTheme = useCallback(
     async (nextTheme: ThemeName) => {
       setThemeState(nextTheme);
-      applyAppearance(nextTheme, fontStyle, paperOpacity);
+      applyAppearance(nextTheme, fontStyle, paperOpacity, priorityColors);
       await setSetting("theme", nextTheme);
     },
-    [fontStyle, paperOpacity],
+    [fontStyle, paperOpacity, priorityColors],
   );
 
   const setFontStyle = useCallback(
     async (nextFontStyle: FontStyleName) => {
       setFontStyleState(nextFontStyle);
-      applyAppearance(theme, nextFontStyle, paperOpacity);
+      applyAppearance(theme, nextFontStyle, paperOpacity, priorityColors);
       await setSetting("font_style", nextFontStyle);
     },
-    [paperOpacity, theme],
+    [paperOpacity, priorityColors, theme],
   );
 
   const setPaperOpacity = useCallback(
     async (nextPaperOpacity: PaperOpacityName) => {
       setPaperOpacityState(nextPaperOpacity);
-      applyAppearance(theme, fontStyle, nextPaperOpacity);
+      applyAppearance(theme, fontStyle, nextPaperOpacity, priorityColors);
       await setSetting("paper_opacity", nextPaperOpacity);
     },
-    [fontStyle, theme],
+    [fontStyle, priorityColors, theme],
   );
+
+  const setMainWindowStyle = useCallback(async (nextStyle: MainWindowStyle) => {
+    setMainWindowStyleState(nextStyle);
+    await setSetting("main_window_style", nextStyle);
+  }, []);
+
+  const setPriorityColors = useCallback(async (nextColors: Record<TaskPriority, string>) => {
+    setPriorityColorsState(nextColors);
+    applyAppearance(theme, fontStyle, paperOpacity, nextColors);
+    await savePriorityColors(nextColors);
+  }, [fontStyle, paperOpacity, theme]);
 
   const setAlwaysOnTop = useCallback(async (nextValue: boolean) => {
     setAlwaysOnTopState(nextValue);
@@ -176,6 +231,10 @@ export function useSettings() {
     setFontStyle,
     paperOpacity,
     setPaperOpacity,
+    mainWindowStyle,
+    setMainWindowStyle,
+    priorityColors,
+    setPriorityColors,
     alwaysOnTop,
     setAlwaysOnTop,
     lastActiveTab,

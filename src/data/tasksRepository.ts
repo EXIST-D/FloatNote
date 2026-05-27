@@ -1,12 +1,14 @@
-import type { Task, TaskScope, TaskStatus } from "../types/domain";
+import type { Task, TaskPriority, TaskScope, TaskStatus } from "../types/domain";
 import { getDb } from "./db";
 import { noteToTaskTitle } from "../features/notes/noteToTaskTitle";
+import { normalizeTaskPriority } from "../features/tasks/taskPriority";
 
 interface TaskRow {
   id: string;
   scope: TaskScope;
   title: string;
   status: TaskStatus;
+  priority: string;
   sort_order: number;
   planned_date: string | null;
   week_key: string | null;
@@ -21,6 +23,7 @@ function mapTask(row: TaskRow): Task {
     scope: row.scope,
     title: row.title,
     status: row.status,
+    priority: normalizeTaskPriority(row.priority),
     sortOrder: row.sort_order,
     plannedDate: row.planned_date,
     weekKey: row.week_key,
@@ -39,19 +42,19 @@ export async function listTasks(scope: TaskScope) {
   return rows.map(mapTask);
 }
 
-export async function createTask(scope: TaskScope, title: string) {
+export async function createTask(scope: TaskScope, title: string, priority: TaskPriority = "medium") {
   const db = await getDb();
   const now = new Date().toISOString();
   const id = crypto.randomUUID();
   const sortOrderRows = await db.select<Array<{ next_order: number | null }>>(
-    "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_order FROM tasks WHERE scope = $1",
+    "SELECT COALESCE(MIN(sort_order), 1) - 1 AS next_order FROM tasks WHERE scope = $1 AND status != 'archived'",
     [scope],
   );
-  const sortOrder = sortOrderRows[0]?.next_order ?? 1;
+  const sortOrder = sortOrderRows[0]?.next_order ?? 0;
 
   await db.execute(
-    "INSERT INTO tasks (id, scope, title, status, sort_order, planned_date, week_key, created_at, updated_at, completed_at) VALUES ($1, $2, $3, 'active', $4, $5, $6, $7, $7, NULL)",
-    [id, scope, title, sortOrder, scope === "today" ? now.slice(0, 10) : null, scope === "week" ? getWeekKey() : null, now],
+    "INSERT INTO tasks (id, scope, title, status, priority, sort_order, planned_date, week_key, created_at, updated_at, completed_at) VALUES ($1, $2, $3, 'active', $4, $5, $6, $7, $8, $8, NULL)",
+    [id, scope, title, priority, sortOrder, scope === "today" ? now.slice(0, 10) : null, scope === "week" ? getWeekKey() : null, now],
   );
 
   return {
@@ -59,6 +62,7 @@ export async function createTask(scope: TaskScope, title: string) {
     scope,
     title,
     status: "active",
+    priority,
     sortOrder,
     plannedDate: scope === "today" ? now.slice(0, 10) : null,
     weekKey: scope === "week" ? getWeekKey() : null,
@@ -71,6 +75,11 @@ export async function createTask(scope: TaskScope, title: string) {
 export async function updateTaskTitle(id: string, title: string) {
   const db = await getDb();
   await db.execute("UPDATE tasks SET title = $1, updated_at = $2 WHERE id = $3", [title, new Date().toISOString(), id]);
+}
+
+export async function updateTaskPriority(id: string, priority: TaskPriority) {
+  const db = await getDb();
+  await db.execute("UPDATE tasks SET priority = $1, updated_at = $2 WHERE id = $3", [priority, new Date().toISOString(), id]);
 }
 
 export async function completeTask(id: string) {
@@ -95,8 +104,8 @@ export async function reorderTasks(tasks: Task[]) {
   }
 }
 
-export async function createTaskFromNote(scope: TaskScope, content: string) {
-  return createTask(scope, noteToTaskTitle(content));
+export async function createTaskFromNote(scope: TaskScope, content: string, priority: TaskPriority = "medium") {
+  return createTask(scope, noteToTaskTitle(content), priority);
 }
 
 export async function deleteTask(id: string) {

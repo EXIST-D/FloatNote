@@ -14,7 +14,8 @@ import { Check, GripVertical, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
-import type { Task, TaskStatus } from "../../types/domain";
+import type { Task, TaskPriority, TaskStatus } from "../../types/domain";
+import { PriorityColorBar } from "./PriorityColorBar";
 import { buildReorderedTasks } from "./taskOrdering";
 import { TaskContextMenu } from "./TaskContextMenu";
 
@@ -23,6 +24,7 @@ interface SortableTaskListProps {
   emptyText: string;
   onStatusChange: (id: string, status: TaskStatus) => Promise<void>;
   onTitleChange: (id: string, title: string) => Promise<void>;
+  onPriorityChange: (id: string, priority: TaskPriority) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onReorder: (tasks: Task[]) => Promise<void>;
 }
@@ -66,7 +68,7 @@ function SortableTaskRow({
     <article
       ref={setNodeRef}
       style={style}
-      className={`grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-start gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-1.5 py-1.5 text-sm ${
+      className={`grid min-w-0 grid-cols-[4px_auto_auto_minmax(0,1fr)_auto] items-start gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-1.5 py-1.5 text-sm ${
         task.status === "done" ? "text-[var(--text-muted)] opacity-75" : "text-[var(--text-main)]"
       } ${isDragging ? "z-20 shadow-[var(--surface-shadow)]" : ""}`}
       onContextMenu={(event) => {
@@ -74,6 +76,7 @@ function SortableTaskRow({
         onContextMenu(task, event.clientX, event.clientY);
       }}
     >
+      <PriorityColorBar priority={task.priority} />
       <button
         type="button"
         className="mt-0.5 grid h-6 w-5 place-items-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)]"
@@ -129,7 +132,7 @@ function SortableTaskRow({
   );
 }
 
-export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChange, onDelete, onReorder }: SortableTaskListProps) {
+export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChange, onPriorityChange, onDelete, onReorder }: SortableTaskListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
@@ -227,6 +230,7 @@ export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChan
           onEdit={startEdit}
           onDelete={(task) => void onDelete(task.id)}
           onCopy={(task) => void copyTask(task)}
+          onPriorityChange={(task, priority) => void onPriorityChange(task.id, priority)}
         />
       )}
     </DndContext>

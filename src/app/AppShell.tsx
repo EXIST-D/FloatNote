@@ -4,7 +4,6 @@ import { TabBar } from "../components/layout/TabBar";
 import { TimerStrip } from "../components/layout/TimerStrip";
 import { FocusView } from "../features/focus/FocusView";
 import { useFocusSession } from "../features/focus/useFocusSession";
-import { HistoryView } from "../features/history/HistoryView";
 import { NotesView } from "../features/notes/NotesView";
 import { useSettings } from "../features/settings/useSettings";
 import { useGlobalShortcut } from "../features/shortcuts/useGlobalShortcut";
@@ -29,12 +28,6 @@ export function AppShell() {
 
   return (
     <FloatingWindow
-      theme={settings.theme}
-      onThemeChange={(theme) => void settings.setTheme(theme)}
-      fontStyle={settings.fontStyle}
-      onFontStyleChange={(fontStyle) => void settings.setFontStyle(fontStyle)}
-      paperOpacity={settings.paperOpacity}
-      onPaperOpacityChange={(paperOpacity) => void settings.setPaperOpacity(paperOpacity)}
       alwaysOnTop={settings.alwaysOnTop}
       onAlwaysOnTopChange={(value) => void settings.setAlwaysOnTop(value)}
       toastMessage={shortcutError}
@@ -52,7 +45,6 @@ export function AppShell() {
       {activeTab === "week" && <WeekView />}
       {activeTab === "notes" && <NotesView />}
       {activeTab === "focus" && <FocusView focus={focus} />}
-      {activeTab === "history" && <HistoryView />}
     </FloatingWindow>
   );
 }

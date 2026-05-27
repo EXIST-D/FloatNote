@@ -1,10 +1,16 @@
-export type AppTab = "today" | "week" | "notes" | "focus" | "history";
+export type AppTab = "today" | "week" | "notes" | "focus";
+
+export type DashboardTab = "home" | "today" | "week" | "notes" | "focus" | "history" | "settings";
 
 export type ThemeName = "paper" | "ink" | "night" | "book" | "reading" | "green";
 
 export type FontStyleName = "clear" | "bookish" | "compact";
 
 export type PaperOpacityName = "clear" | "soft" | "solid";
+
+export type MainWindowStyle = "desk" | "minimal" | "green";
+
+export type TaskPriority = "high" | "medium" | "low";
 
 export type TaskScope = "today" | "week";
 
@@ -15,6 +21,7 @@ export interface Task {
   scope: TaskScope;
   title: string;
   status: TaskStatus;
+  priority: TaskPriority;
   sortOrder: number;
   plannedDate: string | null;
   weekKey: string | null;

@@ -1,5 +1,6 @@
 import { Check, Clipboard, Pencil, RotateCcw, Trash2 } from "lucide-react";
-import type { Task } from "../../types/domain";
+import type { Task, TaskPriority } from "../../types/domain";
+import { PriorityPicker } from "./PriorityPicker";
 
 interface TaskContextMenuProps {
   task: Task;
@@ -10,11 +11,12 @@ interface TaskContextMenuProps {
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
   onCopy: (task: Task) => void;
+  onPriorityChange: (task: Task, priority: TaskPriority) => void;
 }
 
-export function TaskContextMenu({ task, x, y, onClose, onToggleStatus, onEdit, onDelete, onCopy }: TaskContextMenuProps) {
-  const left = Math.max(12, Math.min(x, Math.max(12, window.innerWidth - 152)));
-  const top = Math.max(12, Math.min(y, Math.max(12, window.innerHeight - 168)));
+export function TaskContextMenu({ task, x, y, onClose, onToggleStatus, onEdit, onDelete, onCopy, onPriorityChange }: TaskContextMenuProps) {
+  const left = Math.max(12, Math.min(x, Math.max(12, window.innerWidth - 184)));
+  const top = Math.max(12, Math.min(y, Math.max(12, window.innerHeight - 228)));
 
   const items = [
     {
@@ -30,10 +32,20 @@ export function TaskContextMenu({ task, x, y, onClose, onToggleStatus, onEdit, o
   return (
     <div className="fixed inset-0 z-40" onClick={onClose} onContextMenu={(event) => event.preventDefault()}>
       <div
-        className="grid w-36 gap-1 rounded-md border border-[var(--menu-border)] bg-[var(--menu-bg)] p-1 text-xs shadow-[var(--surface-shadow)]"
+        className="grid w-44 gap-1 rounded-md border border-[var(--menu-border)] bg-[var(--menu-bg)] p-1 text-xs shadow-[var(--surface-shadow)]"
         style={{ left, top, position: "fixed" }}
         onClick={(event) => event.stopPropagation()}
       >
+        <div className="border-b border-[var(--menu-border)] p-1.5">
+          <p className="mb-1 text-[var(--text-muted)]">优先级</p>
+          <PriorityPicker
+            value={task.priority}
+            onChange={(priority) => {
+              onPriorityChange(task, priority);
+              onClose();
+            }}
+          />
+        </div>
         {items.map((item) => {
           const Icon = item.icon;
           return (

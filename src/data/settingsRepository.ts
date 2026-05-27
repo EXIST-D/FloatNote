@@ -1,4 +1,6 @@
 import { getDb } from "./db";
+import type { MainWindowStyle, TaskPriority } from "../types/domain";
+import { DEFAULT_PRIORITY_COLORS, isPriorityColorMap } from "../features/tasks/taskPriority";
 
 export interface WindowPositionSetting {
   x: number;
@@ -9,6 +11,8 @@ export interface WindowSizeSetting {
   width: number;
   height: number;
 }
+
+export interface WindowBoundsSetting extends WindowPositionSetting, WindowSizeSetting {}
 
 export async function getSetting(key: string) {
   const db = await getDb();
@@ -53,4 +57,20 @@ export function isWindowSizeSetting(value: unknown): value is WindowSizeSetting 
     (value as WindowSizeSetting).width >= 320 &&
     (value as WindowSizeSetting).height >= 260
   );
+}
+
+export function isWindowBoundsSetting(value: unknown): value is WindowBoundsSetting {
+  return isWindowPositionSetting(value) && isWindowSizeSetting(value);
+}
+
+export function isMainWindowStyle(value: string | null): value is MainWindowStyle {
+  return value === "desk" || value === "minimal" || value === "green";
+}
+
+export async function getPriorityColors() {
+  return parseJsonSetting(await getSetting("priority_colors"), isPriorityColorMap) ?? DEFAULT_PRIORITY_COLORS;
+}
+
+export async function setPriorityColors(colors: Record<TaskPriority, string>) {
+  await setSetting("priority_colors", JSON.stringify(colors));
 }

@@ -14,3 +14,10 @@ export function buildReorderedTasks(tasks: Task[], activeId: string, overId: str
 
   return next.map((task, index) => ({ ...task, sortOrder: index + 1 }));
 }
+
+export function getTopInsertSortOrder(tasks: Pick<Task, "sortOrder">[]) {
+  if (tasks.length === 0) return 0;
+
+  const minOrder = tasks.reduce((min, task) => Math.min(min, task.sortOrder), Number.POSITIVE_INFINITY);
+  return minOrder - 1;
+}

@@ -4,7 +4,7 @@ import { TaskInput } from "./TaskInput";
 import { useTodayTasks } from "./useTodayTasks";
 
 export function TodayView() {
-  const { tasks, loading, error, addTask, changeStatus, editTask, removeTask, changeOrder } = useTodayTasks();
+  const { tasks, loading, error, addTask, changeStatus, editTask, changePriority, removeTask, changeOrder } = useTodayTasks();
 
   return (
     <PanelBody>
@@ -18,6 +18,7 @@ export function TodayView() {
           emptyText="今天还没有任务"
           onStatusChange={changeStatus}
           onTitleChange={editTask}
+          onPriorityChange={changePriority}
           onDelete={removeTask}
           onReorder={changeOrder}
         />

@@ -1,20 +1,12 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { Minus, Pin, Settings, X } from "lucide-react";
+import { LayoutDashboard, Minus, Pin, Settings, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { useState } from "react";
-import type { FontStyleName, PaperOpacityName, ThemeName } from "../../types/domain";
+import { openDashboardWindow } from "../../features/dashboard/useDashboardWindow";
 import { IconButton } from "../common/IconButton";
 import { Toast } from "../common/Toast";
-import { ThemeMenu } from "../theme/ThemeMenu";
 
 interface FloatingWindowProps {
   children: ReactNode;
-  theme: ThemeName;
-  onThemeChange: (theme: ThemeName) => void;
-  fontStyle: FontStyleName;
-  onFontStyleChange: (fontStyle: FontStyleName) => void;
-  paperOpacity: PaperOpacityName;
-  onPaperOpacityChange: (paperOpacity: PaperOpacityName) => void;
   alwaysOnTop: boolean;
   onAlwaysOnTopChange: (value: boolean) => void;
   toastMessage?: string | null;
@@ -22,18 +14,10 @@ interface FloatingWindowProps {
 
 export function FloatingWindow({
   children,
-  theme,
-  onThemeChange,
-  fontStyle,
-  onFontStyleChange,
-  paperOpacity,
-  onPaperOpacityChange,
   alwaysOnTop,
   onAlwaysOnTopChange,
   toastMessage = null,
 }: FloatingWindowProps) {
-  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
-
   return (
     <main className="h-screen w-screen overflow-hidden bg-transparent p-0">
       <section className="note-shell relative flex h-full w-full flex-col overflow-hidden text-[var(--text-main)]">
@@ -49,7 +33,10 @@ export function FloatingWindow({
             >
               <Pin size={15} fill={alwaysOnTop ? "currentColor" : "none"} />
             </IconButton>
-            <IconButton label="外观" onClick={() => setThemeMenuOpen((open) => !open)}>
+            <IconButton label="打开主窗口" onClick={() => void openDashboardWindow("home")}>
+              <LayoutDashboard size={15} />
+            </IconButton>
+            <IconButton label="设置" onClick={() => void openDashboardWindow("settings")}>
               <Settings size={15} />
             </IconButton>
             <IconButton label="隐藏" onClick={() => void getCurrentWindow().hide()}>
@@ -60,16 +47,6 @@ export function FloatingWindow({
             </IconButton>
           </div>
         </header>
-        {themeMenuOpen && (
-          <ThemeMenu
-            theme={theme}
-            onThemeChange={onThemeChange}
-            fontStyle={fontStyle}
-            onFontStyleChange={onFontStyleChange}
-            paperOpacity={paperOpacity}
-            onPaperOpacityChange={onPaperOpacityChange}
-          />
-        )}
         {children}
         <Toast message={toastMessage} />
       </section>

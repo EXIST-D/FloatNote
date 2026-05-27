@@ -48,4 +48,9 @@ export async function initializeSchema() {
       value TEXT NOT NULL
     )
   `);
+
+  const taskColumns = await db.select<Array<{ name: string }>>("PRAGMA table_info(tasks)");
+  if (!taskColumns.some((column) => column.name === "priority")) {
+    await db.execute("ALTER TABLE tasks ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'");
+  }
 }

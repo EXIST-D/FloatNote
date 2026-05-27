@@ -4,7 +4,7 @@ import { TaskInput } from "../today/TaskInput";
 import { useWeekTasks } from "./useWeekTasks";
 
 export function WeekView() {
-  const { tasks, loading, error, addTask, changeStatus, editTask, removeTask, changeOrder } = useWeekTasks();
+  const { tasks, loading, error, addTask, changeStatus, editTask, changePriority, removeTask, changeOrder } = useWeekTasks();
 
   return (
     <PanelBody>
@@ -18,6 +18,7 @@ export function WeekView() {
           emptyText="本周还没有任务"
           onStatusChange={changeStatus}
           onTitleChange={editTask}
+          onPriorityChange={changePriority}
           onDelete={removeTask}
           onReorder={changeOrder}
         />
