@@ -1,6 +1,6 @@
 [package]
 name = "desktop_note"
-version = "0.1.0"
+version = "0.4.0"
 description = "中文桌面便签应用"
 authors = ["you"]
 edition = "2021"

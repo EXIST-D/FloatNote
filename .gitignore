@@ -34,3 +34,6 @@ temp/
 
 # Superpowers visual brainstorming sessions
 .superpowers/
+
+# Local development notes
+docs/

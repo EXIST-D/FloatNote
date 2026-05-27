@@ -268,49 +268,6 @@ button {
   background: var(--priority-medium);
 }
 
-.priority-color-bar[data-priority="high"],
-.priority-picker button[data-priority="high"] span {
-  background: var(--priority-high);
-}
-
-.priority-color-bar[data-priority="medium"],
-.priority-picker button[data-priority="medium"] span {
-  background: var(--priority-medium);
-}
-
-.priority-color-bar[data-priority="low"],
-.priority-picker button[data-priority="low"] span {
-  background: var(--priority-low);
-}
-
-.priority-picker {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-}
-
-.priority-picker button {
-  display: inline-flex;
-  min-width: 0;
-  height: 26px;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border-radius: 6px;
-  color: var(--text-muted);
-}
-
-.priority-picker button.is-active {
-  background: rgb(0 0 0 / 0.06);
-  color: var(--text-main);
-}
-
-.priority-picker span {
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-}
-
 .task-label-picker {
   display: grid;
   max-height: 150px;
