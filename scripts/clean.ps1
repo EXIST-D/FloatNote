@@ -21,9 +21,17 @@ function Remove-InProject {
   }
 
   if ($Recurse) {
-    Remove-Item -LiteralPath $resolved -Recurse -Force
+    try {
+      Remove-Item -LiteralPath $resolved -Recurse -Force
+    } catch {
+      Write-Warning "Skipped locked or protected path: $resolved"
+    }
   } else {
-    Remove-Item -LiteralPath $resolved -Force
+    try {
+      Remove-Item -LiteralPath $resolved -Force
+    } catch {
+      Write-Warning "Skipped locked or protected file: $resolved"
+    }
   }
 }
 
