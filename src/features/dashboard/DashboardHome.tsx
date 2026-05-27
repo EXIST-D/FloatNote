@@ -4,10 +4,15 @@ import type { DashboardTab } from "../../types/domain";
 import { formatDuration } from "../../lib/time";
 import { formatFocusHistorySummary } from "../history/historyFormat";
 import { useHistory } from "../history/useHistory";
+import { useReviewActions } from "../review/useReviewActions";
 import { useDashboardSummary } from "./useDashboardSummary";
 
 interface DashboardHomeProps {
   onNavigate: (tab: DashboardTab) => void;
+  heroCopy: {
+    kicker: string;
+    title: string;
+  };
 }
 
 function StatusList({ items, emptyText }: { items: string[]; emptyText: string }) {
@@ -28,6 +33,7 @@ function WorkCard({
   icon: Icon,
   onClick,
   children,
+  action,
 }: {
   title: string;
   subtitle: string;
@@ -35,11 +41,12 @@ function WorkCard({
   icon: typeof ListTodo;
   onClick: () => void;
   children: ReactNode;
+  action?: ReactNode;
 }) {
   return (
-    <button type="button" className="dashboard-work-card" style={{ "--card-accent": accent } as CSSProperties} onClick={onClick}>
+    <article className="dashboard-work-card" style={{ "--card-accent": accent } as CSSProperties}>
       <span className="dashboard-card-bar" />
-      <span className="dashboard-card-head">
+      <button type="button" className="dashboard-card-head" onClick={onClick}>
         <span className="dashboard-card-icon">
           <Icon size={18} />
         </span>
@@ -48,15 +55,17 @@ function WorkCard({
           <small>{subtitle}</small>
         </span>
         <ArrowRight size={16} />
-      </span>
+      </button>
       <span className="dashboard-card-body">{children}</span>
-    </button>
+      {action && <span className="dashboard-card-actions">{action}</span>}
+    </article>
   );
 }
 
-export function DashboardHome({ onNavigate }: DashboardHomeProps) {
+export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
   const { summary, loading, error } = useDashboardSummary();
   const { groups } = useHistory();
+  const reviewActions = useReviewActions();
 
   if (loading) {
     return <main className="dashboard-page dashboard-centered">正在整理今日书桌...</main>;
@@ -67,13 +76,23 @@ export function DashboardHome({ onNavigate }: DashboardHomeProps) {
   }
 
   const recentHistory = groups.slice(0, 4);
+  const recentHistoryText =
+    recentHistory.length > 0
+      ? recentHistory
+          .map((group) => {
+            const recordCount = group.reviews.length + group.tasks.length + group.notes.length + group.focusSessions.length;
+            const reviewTitle = group.reviews[0]?.title;
+            return reviewTitle ? `${group.date} · ${reviewTitle}` : `${group.date} · ${recordCount} 条`;
+          })
+          .join(" / ")
+      : "暂无历史";
 
   return (
     <main className="dashboard-page">
       <section className="dashboard-hero">
         <div>
-          <p>今日工作盘</p>
-          <h1>把零散任务、灵感和专注时间收在一张桌面上</h1>
+          <p>{heroCopy.kicker}</p>
+          <h1>{heroCopy.title}</h1>
         </div>
         <strong>{formatDuration(summary.todayFocusSeconds)}</strong>
       </section>
@@ -85,6 +104,11 @@ export function DashboardHome({ onNavigate }: DashboardHomeProps) {
           accent="var(--priority-medium)"
           icon={ListTodo}
           onClick={() => onNavigate("today")}
+          action={
+            <button type="button" onClick={() => void reviewActions.finishReview("today")}>
+              结束今日
+            </button>
+          }
         >
           <StatusList items={summary.todayTasks.map((task) => task.title)} emptyText="今天还没有任务" />
         </WorkCard>
@@ -94,6 +118,11 @@ export function DashboardHome({ onNavigate }: DashboardHomeProps) {
           accent="var(--priority-low)"
           icon={NotebookTabs}
           onClick={() => onNavigate("week")}
+          action={
+            <button type="button" onClick={() => void reviewActions.finishReview("week")}>
+              结束本周
+            </button>
+          }
         >
           <StatusList items={summary.weekTasks.map((task) => task.title)} emptyText="本周还没有任务" />
         </WorkCard>
@@ -110,10 +139,12 @@ export function DashboardHome({ onNavigate }: DashboardHomeProps) {
           <StatusList items={summary.focusSessions.slice(0, 4).map(formatFocusHistorySummary)} emptyText="还没有专注记录" />
         </WorkCard>
       </section>
+      {reviewActions.message && <p className="review-message">{reviewActions.message}</p>}
+      {reviewActions.error && <p className="review-error">{reviewActions.error}</p>}
 
       <button type="button" className="dashboard-history-strip" onClick={() => onNavigate("history")}>
         <span>最近历史</span>
-        <strong>{recentHistory.length > 0 ? recentHistory.map((group) => `${group.date} · ${group.tasks.length + group.notes.length} 条`).join(" / ") : "暂无历史"}</strong>
+        <strong>{recentHistoryText}</strong>
         <ArrowRight size={16} />
       </button>
     </main>

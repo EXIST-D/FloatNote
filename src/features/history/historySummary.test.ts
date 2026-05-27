@@ -3,6 +3,15 @@ import type { FocusSession, HistoryDayGroup, Note, Task } from "../../types/doma
 import { summarizeHistoryDay } from "./historySummary";
 
 const now = "2026-05-27T09:00:00.000Z";
+const label = {
+  id: "label-medium",
+  name: "中优先级",
+  color: "#d6a441",
+  sortOrder: 2,
+  isDefault: true,
+  createdAt: now,
+  updatedAt: now,
+};
 
 function task(title: string): Task {
   return {
@@ -11,6 +20,8 @@ function task(title: string): Task {
     title,
     status: "done",
     priority: "medium",
+    labelId: label.id,
+    label,
     sortOrder: 1,
     plannedDate: "2026-05-27",
     weekKey: null,
@@ -42,6 +53,7 @@ describe("summarizeHistoryDay", () => {
   it("counts records and focus duration", () => {
     const group: HistoryDayGroup = {
       date: "2026-05-27",
+      reviews: [],
       tasks: [task("写方案")],
       notes: [note("一个新点子")],
       focusSessions: [focus("论文阅读", 1800), focus("代码整理", 600)],
@@ -49,6 +61,7 @@ describe("summarizeHistoryDay", () => {
 
     expect(summarizeHistoryDay(group)).toEqual({
       date: "2026-05-27",
+      reviewCount: 0,
       taskCount: 1,
       noteCount: 1,
       focusSeconds: 2400,

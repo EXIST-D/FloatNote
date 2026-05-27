@@ -2,6 +2,16 @@ import { describe, expect, it } from "vitest";
 import type { Task } from "../../types/domain";
 import { buildReorderedTasks, getTopInsertSortOrder } from "./taskOrdering";
 
+const label = {
+  id: "label-medium",
+  name: "中优先级",
+  color: "#d6a441",
+  sortOrder: 2,
+  isDefault: true,
+  createdAt: "2026-05-27T00:00:00.000Z",
+  updatedAt: "2026-05-27T00:00:00.000Z",
+};
+
 function makeTask(id: string, sortOrder: number): Task {
   return {
     id,
@@ -9,6 +19,8 @@ function makeTask(id: string, sortOrder: number): Task {
     title: id,
     status: "active",
     priority: "medium",
+    labelId: label.id,
+    label,
     sortOrder,
     plannedDate: "2026-05-27",
     weekKey: null,

@@ -6,7 +6,7 @@ import { summarizeHistoryDay } from "./historySummary";
 import { useHistory } from "./useHistory";
 
 export function HistoryAccordionView() {
-  const { groups, loading, error } = useHistory();
+  const { groups, loading, error, removeHistoryItem } = useHistory();
   const [openDate, setOpenDate] = useState<string | null>(null);
 
   if (error) return <main className="dashboard-page text-red-700">{error}</main>;
@@ -29,16 +29,72 @@ export function HistoryAccordionView() {
                 <span>
                   <strong>{formatHistoryDateLabel(group.date)}</strong>
                   <small>
-                    任务 {summary.taskCount} · 灵感 {summary.noteCount} · 专注 {formatDuration(summary.focusSeconds)}
+                    复盘 {summary.reviewCount} · 任务 {summary.taskCount} · 灵感 {summary.noteCount} · 专注 {formatDuration(summary.focusSeconds)}
                   </small>
                 </span>
                 <em>{open ? "收起" : "展开"}</em>
               </button>
               {open && (
                 <div className="history-day-detail">
-                  {group.tasks.map((task) => <p key={task.id}>任务 · {task.title}</p>)}
-                  {group.notes.map((note) => <p key={note.id}>灵感 · {note.content}</p>)}
-                  {group.focusSessions.map((session) => <p key={session.id}>专注 · {formatFocusHistorySummary(session)}</p>)}
+                  {group.reviews.map((review) => (
+                    <div key={review.id} className="history-record history-record-review">
+                      <span>
+                        <strong>{review.title}</strong>
+                        <small>
+                          完成 {review.snapshot.completedTasks.length} /{" "}
+                          {review.snapshot.completedTasks.length + review.snapshot.unfinishedTasks.length} · 专注{" "}
+                          {formatDuration(review.snapshot.focusSeconds)}
+                        </small>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm("删除这条复盘总结？删除后不可恢复。")) void removeHistoryItem("review", review.id);
+                        }}
+                      >
+                        删除
+                      </button>
+                    </div>
+                  ))}
+                  {group.tasks.map((task) => (
+                    <div key={task.id} className="history-record">
+                      <span>任务 · {task.title}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm("删除这条任务记录？删除后不可恢复。")) void removeHistoryItem("task", task.id);
+                        }}
+                      >
+                        删除
+                      </button>
+                    </div>
+                  ))}
+                  {group.notes.map((note) => (
+                    <div key={note.id} className="history-record">
+                      <span>灵感 · {note.content}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm("删除这条灵感记录？删除后不可恢复。")) void removeHistoryItem("note", note.id);
+                        }}
+                      >
+                        删除
+                      </button>
+                    </div>
+                  ))}
+                  {group.focusSessions.map((session) => (
+                    <div key={session.id} className="history-record">
+                      <span>专注 · {formatFocusHistorySummary(session)}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm("删除这条专注记录？删除后不可恢复。")) void removeHistoryItem("focus", session.id);
+                        }}
+                      >
+                        删除
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </article>

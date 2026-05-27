@@ -1,6 +1,9 @@
 import { getDb } from "./db";
-import type { MainWindowStyle, TaskPriority } from "../types/domain";
+import type { MainWindowStyle, ReviewMode, TaskPriority } from "../types/domain";
 import { DEFAULT_PRIORITY_COLORS, isPriorityColorMap } from "../features/tasks/taskPriority";
+
+export const DEFAULT_DASHBOARD_HERO_KICKER = "今日工作盘";
+export const DEFAULT_DASHBOARD_HERO_TITLE = "把零散任务、灵感和专注时间收在一张桌面上";
 
 export interface WindowPositionSetting {
   x: number;
@@ -73,4 +76,32 @@ export async function getPriorityColors() {
 
 export async function setPriorityColors(colors: Record<TaskPriority, string>) {
   await setSetting("priority_colors", JSON.stringify(colors));
+}
+
+export function isReviewMode(value: string | null): value is ReviewMode {
+  return value === "manual_with_prompt" || value === "manual_only";
+}
+
+export async function getReviewMode() {
+  const saved = await getSetting("review_mode");
+  return isReviewMode(saved) ? saved : "manual_with_prompt";
+}
+
+export async function setReviewMode(mode: ReviewMode) {
+  await setSetting("review_mode", mode);
+}
+
+export async function getDashboardHeroCopy() {
+  const [kicker, title] = await Promise.all([getSetting("dashboard_hero_kicker"), getSetting("dashboard_hero_title")]);
+  return {
+    kicker: kicker?.trim() || DEFAULT_DASHBOARD_HERO_KICKER,
+    title: title?.trim() || DEFAULT_DASHBOARD_HERO_TITLE,
+  };
+}
+
+export async function setDashboardHeroCopy(copy: { kicker: string; title: string }) {
+  await Promise.all([
+    setSetting("dashboard_hero_kicker", copy.kicker.trim() || DEFAULT_DASHBOARD_HERO_KICKER),
+    setSetting("dashboard_hero_title", copy.title.trim() || DEFAULT_DASHBOARD_HERO_TITLE),
+  ]);
 }

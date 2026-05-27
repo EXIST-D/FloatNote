@@ -14,17 +14,18 @@ import { Check, GripVertical, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
-import type { Task, TaskPriority, TaskStatus } from "../../types/domain";
-import { PriorityColorBar } from "./PriorityColorBar";
+import type { Task, TaskStatus } from "../../types/domain";
 import { buildReorderedTasks } from "./taskOrdering";
+import { TaskLabelColorBar } from "./TaskLabelColorBar";
 import { TaskContextMenu } from "./TaskContextMenu";
+import { useTaskLabels } from "./useTaskLabels";
 
 interface SortableTaskListProps {
   tasks: Task[];
   emptyText: string;
   onStatusChange: (id: string, status: TaskStatus) => Promise<void>;
   onTitleChange: (id: string, title: string) => Promise<void>;
-  onPriorityChange: (id: string, priority: TaskPriority) => Promise<void>;
+  onLabelChange: (id: string, labelId: string) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onReorder: (tasks: Task[]) => Promise<void>;
 }
@@ -76,7 +77,7 @@ function SortableTaskRow({
         onContextMenu(task, event.clientX, event.clientY);
       }}
     >
-      <PriorityColorBar priority={task.priority} />
+      <TaskLabelColorBar label={task.label} />
       <button
         type="button"
         className="mt-0.5 grid h-6 w-5 place-items-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)]"
@@ -132,11 +133,12 @@ function SortableTaskRow({
   );
 }
 
-export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChange, onPriorityChange, onDelete, onReorder }: SortableTaskListProps) {
+export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChange, onLabelChange, onDelete, onReorder }: SortableTaskListProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [menuState, setMenuState] = useState<{ task: Task; x: number; y: number } | null>(null);
+  const taskLabels = useTaskLabels();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -223,6 +225,7 @@ export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChan
       {menuState && (
         <TaskContextMenu
           task={menuState.task}
+          labels={taskLabels.labels}
           x={menuState.x}
           y={menuState.y}
           onClose={() => setMenuState(null)}
@@ -230,7 +233,7 @@ export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChan
           onEdit={startEdit}
           onDelete={(task) => void onDelete(task.id)}
           onCopy={(task) => void copyTask(task)}
-          onPriorityChange={(task, priority) => void onPriorityChange(task.id, priority)}
+          onLabelChange={(task, labelId) => void onLabelChange(task.id, labelId)}
         />
       )}
     </DndContext>

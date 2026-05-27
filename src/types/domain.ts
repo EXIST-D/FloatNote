@@ -16,12 +16,28 @@ export type TaskScope = "today" | "week";
 
 export type TaskStatus = "active" | "done" | "archived";
 
+export type ReviewMode = "manual_with_prompt" | "manual_only";
+
+export type ReviewPeriodType = "day" | "week";
+
+export interface TaskLabel {
+  id: string;
+  name: string;
+  color: string;
+  sortOrder: number;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Task {
   id: string;
   scope: TaskScope;
   title: string;
   status: TaskStatus;
   priority: TaskPriority;
+  labelId: string | null;
+  label: TaskLabel | null;
   sortOrder: number;
   plannedDate: string | null;
   weekKey: string | null;
@@ -52,8 +68,27 @@ export interface FocusSession {
   updatedAt: string;
 }
 
+export interface ReviewSummarySnapshot {
+  completedTasks: Array<{ id: string; title: string; labelName: string | null }>;
+  unfinishedTasks: Array<{ id: string; title: string; labelName: string | null }>;
+  noteCount: number;
+  notePreviews: string[];
+  focusSeconds: number;
+}
+
+export interface ReviewSummary {
+  id: string;
+  periodType: ReviewPeriodType;
+  periodKey: string;
+  title: string;
+  snapshot: ReviewSummarySnapshot;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface HistoryDayGroup {
   date: string;
+  reviews: ReviewSummary[];
   tasks: Task[];
   notes: Note[];
   focusSessions: FocusSession[];

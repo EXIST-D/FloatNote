@@ -290,6 +290,35 @@ button {
   border-radius: 999px;
 }
 
+.task-label-picker {
+  display: grid;
+  max-height: 150px;
+  gap: 4px;
+  overflow: auto;
+}
+
+.task-label-picker button {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 9px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  border-radius: 7px;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.task-label-picker button.is-active {
+  background: rgb(0 0 0 / 0.06);
+  color: var(--text-main);
+}
+
+.task-label-picker span {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+}
+
 .dashboard-shell {
   display: grid;
   width: 100vw;
@@ -499,7 +528,7 @@ button {
   min-width: 0;
   min-height: 0;
   grid-template-columns: 8px minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 0 14px;
   overflow: hidden;
   border: 1px solid rgb(77 66 43 / 0.12);
@@ -514,7 +543,7 @@ button {
 }
 
 .dashboard-card-bar {
-  grid-row: 1 / span 2;
+  grid-row: 1 / span 3;
   width: 8px;
   border-radius: 999px;
   background: var(--card-accent);
@@ -522,10 +551,12 @@ button {
 
 .dashboard-card-head {
   display: grid;
+  width: 100%;
   min-width: 0;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
+  text-align: left;
 }
 
 .dashboard-card-icon {
@@ -556,6 +587,52 @@ button {
   min-height: 0;
   overflow: hidden;
   padding-top: 12px;
+}
+
+.dashboard-card-actions {
+  display: flex;
+  align-items: center;
+  padding-top: 10px;
+}
+
+.dashboard-card-actions button,
+.review-prompt button,
+.review-inline-button,
+.review-toast {
+  min-height: 28px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.72);
+  padding: 0 10px;
+  color: var(--text-main);
+}
+
+.review-prompt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgb(214 164 65 / 0.36);
+  border-radius: 10px;
+  background: rgb(255 248 220 / 0.86);
+  padding: 10px 12px;
+}
+
+.review-prompt div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.review-message,
+.review-toast {
+  color: #2f5a4f;
+  font-size: 13px;
+}
+
+.review-error {
+  color: var(--danger);
+  font-size: 13px;
 }
 
 .dashboard-mini-list {
@@ -661,6 +738,38 @@ button {
   overflow-wrap: anywhere;
 }
 
+.history-record {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.history-record:hover {
+  background: rgb(255 255 255 / 0.42);
+}
+
+.history-record span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.history-record small {
+  display: block;
+  margin-top: 3px;
+  color: rgb(47 42 32 / 0.56);
+}
+
+.history-record button {
+  min-height: 26px;
+  border-radius: 7px;
+  padding: 0 8px;
+  color: var(--danger);
+}
+
 .settings-grid {
   display: grid;
   min-height: 0;
@@ -713,6 +822,72 @@ button {
 .priority-color-editor input {
   width: 42px;
   height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.settings-field {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-field span {
+  color: rgb(47 42 32 / 0.58);
+  font-size: 12px;
+}
+
+.settings-field input,
+.task-label-editor-row input:not([type="color"]) {
+  min-width: 0;
+  height: 34px;
+  border: 1px solid rgb(77 66 43 / 0.12);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.58);
+  padding: 0 10px;
+}
+
+.settings-actions,
+.task-label-editor-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.settings-actions button,
+.task-label-editor-row button {
+  min-height: 32px;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.68);
+  padding: 0 10px;
+  color: var(--text-main);
+}
+
+.settings-error,
+.danger-text {
+  color: var(--danger);
+}
+
+.task-label-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.task-label-editor-row {
+  border: 1px solid rgb(77 66 43 / 0.12);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.42);
+  padding: 8px;
+}
+
+.task-label-editor-row input:not([type="color"]) {
+  flex: 1 1 160px;
+}
+
+.task-label-editor-row input[type="color"] {
+  width: 42px;
+  height: 30px;
   padding: 0;
   border: 0;
   background: transparent;

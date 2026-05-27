@@ -8,6 +8,9 @@ import { FocusView } from "../features/focus/FocusView";
 import { useFocusSession } from "../features/focus/useFocusSession";
 import { HistoryAccordionView } from "../features/history/HistoryAccordionView";
 import { NotesView } from "../features/notes/NotesView";
+import { ReviewPrompt } from "../features/review/ReviewPrompt";
+import { useReviewActions } from "../features/review/useReviewActions";
+import { useReviewPrompt } from "../features/review/useReviewPrompt";
 import { DashboardSettingsView } from "../features/settings/DashboardSettingsView";
 import { useSettings } from "../features/settings/useSettings";
 import { TodayView } from "../features/today/TodayView";
@@ -21,6 +24,8 @@ function isDashboardTab(value: unknown): value is DashboardTab {
 export function DashboardShell() {
   const settings = useSettings({ manageFloatingWindow: false });
   const focus = useFocusSession();
+  const reviewActions = useReviewActions();
+  const reviewPrompt = useReviewPrompt();
   const [activeTab, setActiveTab] = useState<DashboardTab>("home");
 
   useEffect(() => {
@@ -58,7 +63,21 @@ export function DashboardShell() {
     <main className="dashboard-shell" data-main-window-style={settings.mainWindowStyle}>
       <DashboardNav activeTab={activeTab} onChange={changeTab} />
       <section className="dashboard-content">
-        {activeTab === "home" && <DashboardHome onNavigate={changeTab} />}
+        <ReviewPrompt
+          prompt={reviewPrompt.prompt}
+          onConfirm={(prompt) => {
+            void reviewActions.finishReview(prompt.kind === "yesterday" ? "today" : "week", prompt.periodKey);
+            reviewPrompt.dismissPrompt();
+          }}
+          onDismiss={reviewPrompt.dismissPrompt}
+        />
+        {reviewActions.message && (
+          <button type="button" className="review-toast" onClick={reviewActions.clearMessage}>
+            {reviewActions.message}
+          </button>
+        )}
+        {reviewActions.error && <p className="review-error">{reviewActions.error}</p>}
+        {activeTab === "home" && <DashboardHome onNavigate={changeTab} heroCopy={settings.dashboardHeroCopy} />}
         {activeTab === "today" && <TodayView />}
         {activeTab === "week" && <WeekView />}
         {activeTab === "notes" && <NotesView />}

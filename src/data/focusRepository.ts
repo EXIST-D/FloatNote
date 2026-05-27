@@ -86,3 +86,8 @@ export async function listFocusSessionsForHistory() {
   );
   return rows.map(mapFocus);
 }
+
+export async function deleteFocusSession(id: string) {
+  const db = await getDb();
+  await db.execute("DELETE FROM focus_sessions WHERE id = $1", [id]);
+}

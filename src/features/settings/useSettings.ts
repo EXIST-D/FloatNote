@@ -4,15 +4,19 @@ import { useCallback, useEffect, useState } from "react";
 import {
   getSetting,
   getPriorityColors,
+  getDashboardHeroCopy,
+  getReviewMode,
   isMainWindowStyle,
   isWindowPositionSetting,
   isWindowSizeSetting,
   parseJsonSetting,
+  setDashboardHeroCopy as saveDashboardHeroCopy,
   setPriorityColors as savePriorityColors,
+  setReviewMode as saveReviewMode,
   setSetting,
 } from "../../data/settingsRepository";
 import { priorityColorsToCssVars } from "../tasks/taskPriority";
-import type { AppTab, FontStyleName, MainWindowStyle, PaperOpacityName, TaskPriority, ThemeName } from "../../types/domain";
+import type { AppTab, FontStyleName, MainWindowStyle, PaperOpacityName, ReviewMode, TaskPriority, ThemeName } from "../../types/domain";
 
 function isThemeName(value: string | null): value is ThemeName {
   return value === "paper" || value === "ink" || value === "night" || value === "book" || value === "reading" || value === "green";
@@ -72,6 +76,11 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
   const [fontStyle, setFontStyleState] = useState<FontStyleName>("clear");
   const [paperOpacity, setPaperOpacityState] = useState<PaperOpacityName>("solid");
   const [mainWindowStyle, setMainWindowStyleState] = useState<MainWindowStyle>("desk");
+  const [reviewMode, setReviewModeState] = useState<ReviewMode>("manual_with_prompt");
+  const [dashboardHeroCopy, setDashboardHeroCopyState] = useState({
+    kicker: "今日工作盘",
+    title: "把零散任务、灵感和专注时间收在一张桌面上",
+  });
   const [priorityColors, setPriorityColorsState] = useState<Record<TaskPriority, string>>({
     high: "#c95742",
     medium: "#d6a441",
@@ -92,6 +101,8 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
         savedSize,
         savedMainWindowStyle,
         savedPriorityColors,
+        savedReviewMode,
+        savedHeroCopy,
       ] = await Promise.all([
         getSetting("theme"),
         getSetting("font_style"),
@@ -102,6 +113,8 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
         getSetting("window_size"),
         getSetting("main_window_style"),
         getPriorityColors(),
+        getReviewMode(),
+        getDashboardHeroCopy(),
       ]);
 
       const nextTheme = isThemeName(savedTheme) ? savedTheme : "paper";
@@ -115,6 +128,8 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
       setFontStyleState(nextFontStyle);
       setPaperOpacityState(nextPaperOpacity);
       setMainWindowStyleState(nextMainWindowStyle);
+      setReviewModeState(savedReviewMode);
+      setDashboardHeroCopyState(savedHeroCopy);
       setPriorityColorsState(savedPriorityColors);
       setAlwaysOnTopState(nextAlwaysOnTop);
       setLastActiveTabState(nextTab);
@@ -207,6 +222,16 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
     await setSetting("main_window_style", nextStyle);
   }, []);
 
+  const setReviewMode = useCallback(async (nextMode: ReviewMode) => {
+    setReviewModeState(nextMode);
+    await saveReviewMode(nextMode);
+  }, []);
+
+  const setDashboardHeroCopy = useCallback(async (nextCopy: { kicker: string; title: string }) => {
+    setDashboardHeroCopyState(nextCopy);
+    await saveDashboardHeroCopy(nextCopy);
+  }, []);
+
   const setPriorityColors = useCallback(async (nextColors: Record<TaskPriority, string>) => {
     setPriorityColorsState(nextColors);
     applyAppearance(theme, fontStyle, paperOpacity, nextColors);
@@ -233,6 +258,10 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
     setPaperOpacity,
     mainWindowStyle,
     setMainWindowStyle,
+    reviewMode,
+    setReviewMode,
+    dashboardHeroCopy,
+    setDashboardHeroCopy,
     priorityColors,
     setPriorityColors,
     alwaysOnTop,
