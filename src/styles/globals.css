@@ -181,8 +181,29 @@ button {
 
 .note-titlebar {
   border-bottom: 1px solid var(--app-border);
-  background: var(--drag-bg);
+  background: rgb(var(--app-bg-rgb) / var(--paper-alpha));
   font-family: var(--font-title);
+}
+
+.note-tabbar {
+  background: rgb(var(--app-bg-rgb) / var(--paper-alpha));
+}
+
+.note-tab {
+  border: 1px solid transparent;
+  color: var(--text-muted);
+}
+
+.note-tab:hover {
+  background: rgb(255 255 255 / var(--paper-alpha));
+  color: var(--text-main);
+}
+
+.note-tab.is-active {
+  border-color: var(--accent);
+  background: rgb(var(--app-bg-rgb) / var(--paper-alpha));
+  color: var(--accent);
+  box-shadow: 0 1px 4px rgb(47 42 32 / 0.08);
 }
 
 .appearance-menu {
@@ -211,7 +232,7 @@ button {
 .theme-choice.is-active,
 .setting-chip.is-active {
   border-color: var(--accent);
-  background: rgb(var(--app-bg-rgb) / 0.5);
+  background: rgb(var(--app-bg-rgb) / var(--paper-alpha));
   color: var(--accent);
 }
 
@@ -325,22 +346,20 @@ button {
   height: 100vh;
   grid-template-columns: 188px minmax(0, 1fr);
   overflow: hidden;
-  background:
-    linear-gradient(90deg, rgb(255 255 255 / 0.84), rgb(255 255 255 / 0.52)),
-    #fbfaf6;
+  background: rgb(var(--app-bg-rgb) / var(--paper-alpha));
   color: #2f2a20;
   font-family: var(--font-body);
 }
 
 .dashboard-shell[data-main-window-style="minimal"] {
-  background: #f6f6f2;
+  background: rgb(246 246 242 / var(--paper-alpha));
   color: #242520;
 }
 
 .dashboard-shell[data-main-window-style="green"] {
   background:
-    radial-gradient(circle at top right, rgb(212 224 194 / 0.7), transparent 34%),
-    #edf4e8;
+    radial-gradient(circle at top right, rgb(212 224 194 / 0.42), transparent 34%),
+    rgb(237 244 232 / var(--paper-alpha));
   color: #1f352d;
 }
 
@@ -350,7 +369,7 @@ button {
   grid-template-rows: auto 1fr;
   gap: 18px;
   border-right: 1px solid rgb(77 66 43 / 0.1);
-  background: rgb(255 255 255 / 0.52);
+  background: rgb(255 255 255 / var(--paper-alpha));
   padding: 22px 18px;
 }
 
@@ -369,7 +388,7 @@ button {
   place-items: center;
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 8px;
-  background: rgb(255 255 255 / 0.66);
+  background: rgb(255 255 255 / var(--paper-alpha));
   color: rgb(47 42 32 / 0.66);
   transition:
     background 0.16s ease,
@@ -391,7 +410,7 @@ button {
   overflow: hidden;
   border: 1px solid rgb(77 66 43 / 0.1);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.62);
+  background: rgb(255 255 255 / var(--paper-alpha));
 }
 
 .dashboard-brand-mark img {
@@ -439,7 +458,7 @@ button {
 
 .dashboard-nav-item:hover,
 .dashboard-nav-item.is-active {
-  background: rgb(255 255 255 / 0.62);
+  background: rgb(255 255 255 / var(--paper-alpha));
   color: #2f5a4f;
 }
 
@@ -451,7 +470,7 @@ button {
   min-width: 0;
   min-height: 0;
   overflow: hidden;
-  background: #fbfaf6;
+  background: rgb(var(--app-bg-rgb) / var(--paper-alpha));
   padding: 22px;
 }
 
@@ -464,7 +483,7 @@ button {
 .dashboard-content > section:not(.dashboard-page) {
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.72);
+  background: rgb(255 255 255 / var(--paper-alpha));
 }
 
 .dashboard-page {
@@ -490,7 +509,7 @@ button {
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
   background:
-    linear-gradient(135deg, rgb(255 255 255 / 0.92), rgb(255 255 255 / 0.72)),
+    linear-gradient(135deg, rgb(255 255 255 / var(--paper-alpha)), rgb(255 255 255 / var(--paper-alpha))),
     linear-gradient(90deg, rgb(214 164 65 / 0.08), transparent);
   padding: 20px 22px;
 }
@@ -533,13 +552,13 @@ button {
   overflow: hidden;
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.76);
+  background: rgb(255 255 255 / var(--paper-alpha));
   padding: 16px;
   text-align: left;
 }
 
 .dashboard-work-card:hover {
-  background: rgb(255 255 255 / 0.72);
+  background: rgb(255 255 255 / var(--paper-alpha));
 }
 
 .dashboard-card-bar {
@@ -565,7 +584,7 @@ button {
   height: 34px;
   place-items: center;
   border-radius: 8px;
-  background: rgb(255 255 255 / 0.68);
+  background: rgb(255 255 255 / var(--paper-alpha));
   color: var(--card-accent);
 }
 
@@ -601,7 +620,7 @@ button {
 .review-toast {
   min-height: 28px;
   border-radius: 8px;
-  background: rgb(255 255 255 / 0.72);
+  background: rgb(255 255 255 / var(--paper-alpha));
   padding: 0 10px;
   color: var(--text-main);
 }
@@ -661,7 +680,7 @@ button {
   gap: 12px;
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.76);
+  background: rgb(255 255 255 / var(--paper-alpha));
   padding: 12px 16px;
   text-align: left;
 }
@@ -695,7 +714,7 @@ button {
   overflow: hidden;
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.48);
+  background: rgb(255 255 255 / var(--paper-alpha));
 }
 
 .history-day-summary {
@@ -749,7 +768,7 @@ button {
 }
 
 .history-record:hover {
-  background: rgb(255 255 255 / 0.42);
+  background: rgb(255 255 255 / var(--paper-alpha));
 }
 
 .history-record span {
@@ -784,7 +803,7 @@ button {
   gap: 14px;
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 10px;
-  background: rgb(255 255 255 / 0.52);
+  background: rgb(255 255 255 / var(--paper-alpha));
   padding: 16px;
 }
 
@@ -815,7 +834,7 @@ button {
   gap: 12px;
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 8px;
-  background: rgb(255 255 255 / 0.36);
+  background: rgb(255 255 255 / var(--paper-alpha));
   padding: 9px 10px;
 }
 
@@ -843,7 +862,7 @@ button {
   height: 34px;
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 8px;
-  background: rgb(255 255 255 / 0.58);
+  background: rgb(255 255 255 / var(--paper-alpha));
   padding: 0 10px;
 }
 
@@ -859,7 +878,7 @@ button {
 .task-label-editor-row button {
   min-height: 32px;
   border-radius: 8px;
-  background: rgb(255 255 255 / 0.68);
+  background: rgb(255 255 255 / var(--paper-alpha));
   padding: 0 10px;
   color: var(--text-main);
 }
@@ -877,7 +896,7 @@ button {
 .task-label-editor-row {
   border: 1px solid rgb(77 66 43 / 0.12);
   border-radius: 8px;
-  background: rgb(255 255 255 / 0.42);
+  background: rgb(255 255 255 / var(--paper-alpha));
   padding: 8px;
 }
 

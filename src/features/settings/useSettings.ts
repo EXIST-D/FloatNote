@@ -1,4 +1,5 @@
 import { PhysicalPosition, PhysicalSize } from "@tauri-apps/api/dpi";
+import { emit, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow, primaryMonitor } from "@tauri-apps/api/window";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -17,6 +18,15 @@ import {
 } from "../../data/settingsRepository";
 import { priorityColorsToCssVars } from "../tasks/taskPriority";
 import type { AppTab, FontStyleName, MainWindowStyle, PaperOpacityName, ReviewMode, TaskPriority, ThemeName } from "../../types/domain";
+
+const APPEARANCE_CHANGED_EVENT = "appearance:changed";
+
+interface AppearancePayload {
+  theme: ThemeName;
+  fontStyle: FontStyleName;
+  paperOpacity: PaperOpacityName;
+  priorityColors: Record<TaskPriority, string>;
+}
 
 function isThemeName(value: string | null): value is ThemeName {
   return value === "paper" || value === "ink" || value === "night" || value === "book" || value === "reading" || value === "green";
@@ -49,6 +59,22 @@ function applyAppearance(
       document.documentElement.style.setProperty(key, String(value));
     }
   }
+}
+
+function isAppearancePayload(value: unknown): value is AppearancePayload {
+  if (typeof value !== "object" || value === null) return false;
+  const payload = value as Partial<AppearancePayload>;
+  return (
+    isThemeName(payload.theme ?? null) &&
+    isFontStyleName(payload.fontStyle ?? null) &&
+    isPaperOpacityName(payload.paperOpacity ?? null) &&
+    typeof payload.priorityColors === "object" &&
+    payload.priorityColors !== null
+  );
+}
+
+async function emitAppearance(payload: AppearancePayload) {
+  await emit(APPEARANCE_CHANGED_EVENT, payload);
 }
 
 async function clampPositionToWorkArea(position: { x: number; y: number }, size: { width: number; height: number }) {
@@ -156,6 +182,24 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
   }, [manageFloatingWindow]);
 
   useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    listen<unknown>(APPEARANCE_CHANGED_EVENT, (event) => {
+      if (!isAppearancePayload(event.payload)) return;
+      const payload = event.payload;
+      setThemeState(payload.theme);
+      setFontStyleState(payload.fontStyle);
+      setPaperOpacityState(payload.paperOpacity);
+      setPriorityColorsState(payload.priorityColors);
+      applyAppearance(payload.theme, payload.fontStyle, payload.paperOpacity, payload.priorityColors);
+    }).then((fn) => {
+      unlisten = fn;
+    });
+
+    return () => unlisten?.();
+  }, []);
+
+  useEffect(() => {
     if (!manageFloatingWindow) return;
 
     const appWindow = getCurrentWindow();
@@ -195,6 +239,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
       setThemeState(nextTheme);
       applyAppearance(nextTheme, fontStyle, paperOpacity, priorityColors);
       await setSetting("theme", nextTheme);
+      await emitAppearance({ theme: nextTheme, fontStyle, paperOpacity, priorityColors });
     },
     [fontStyle, paperOpacity, priorityColors],
   );
@@ -204,6 +249,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
       setFontStyleState(nextFontStyle);
       applyAppearance(theme, nextFontStyle, paperOpacity, priorityColors);
       await setSetting("font_style", nextFontStyle);
+      await emitAppearance({ theme, fontStyle: nextFontStyle, paperOpacity, priorityColors });
     },
     [paperOpacity, priorityColors, theme],
   );
@@ -213,6 +259,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
       setPaperOpacityState(nextPaperOpacity);
       applyAppearance(theme, fontStyle, nextPaperOpacity, priorityColors);
       await setSetting("paper_opacity", nextPaperOpacity);
+      await emitAppearance({ theme, fontStyle, paperOpacity: nextPaperOpacity, priorityColors });
     },
     [fontStyle, priorityColors, theme],
   );
@@ -236,6 +283,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
     setPriorityColorsState(nextColors);
     applyAppearance(theme, fontStyle, paperOpacity, nextColors);
     await savePriorityColors(nextColors);
+    await emitAppearance({ theme, fontStyle, paperOpacity, priorityColors: nextColors });
   }, [fontStyle, paperOpacity, theme]);
 
   const setAlwaysOnTop = useCallback(async (nextValue: boolean) => {
