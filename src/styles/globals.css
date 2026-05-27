@@ -356,13 +356,19 @@ button {
 
 .dashboard-brand-mark {
   display: grid;
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  border: 1px solid rgb(77 66 43 / 0.16);
-  border-radius: 8px;
-  background: rgb(255 255 255 / 0.52);
-  color: #8b5f2f;
+  overflow: hidden;
+  border: 1px solid rgb(77 66 43 / 0.1);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.62);
+}
+
+.dashboard-brand-mark img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .dashboard-brand strong,

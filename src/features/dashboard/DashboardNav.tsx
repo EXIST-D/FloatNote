@@ -1,4 +1,5 @@
-import { BarChart3, CalendarDays, Clock3, Home, Lightbulb, ListTodo, PanelTopOpen, Settings, Sparkles } from "lucide-react";
+import { BarChart3, CalendarDays, Clock3, Home, Lightbulb, ListTodo, PanelTopOpen, Settings } from "lucide-react";
+import appIconUrl from "../../assets/app-icon.png";
 import { openFloatingWindow } from "./useDashboardWindow";
 import type { DashboardTab } from "../../types/domain";
 
@@ -22,7 +23,7 @@ export function DashboardNav({ activeTab, onChange }: DashboardNavProps) {
     <aside className="dashboard-nav">
       <div className="dashboard-brand">
         <span className="dashboard-brand-mark">
-          <Sparkles size={18} />
+          <img src={appIconUrl} alt="" />
         </span>
         <div className="min-w-0">
           <strong>浮笺</strong>
