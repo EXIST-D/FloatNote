@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import type { MainWindowStyle, ReviewMode, TaskPriority } from "../types/domain";
+import type { DashboardBackgroundPreset, DashboardBackgroundSetting, MainWindowStyle, ReviewMode, TaskPriority } from "../types/domain";
 import { DEFAULT_PRIORITY_COLORS, isPriorityColorMap } from "../features/tasks/taskPriority";
 
 export const DEFAULT_DASHBOARD_HERO_KICKER = "今日工作盘";
@@ -104,4 +104,40 @@ export async function setDashboardHeroCopy(copy: { kicker: string; title: string
     setSetting("dashboard_hero_kicker", copy.kicker.trim() || DEFAULT_DASHBOARD_HERO_KICKER),
     setSetting("dashboard_hero_title", copy.title.trim() || DEFAULT_DASHBOARD_HERO_TITLE),
   ]);
+}
+
+export const DEFAULT_DASHBOARD_BACKGROUND: DashboardBackgroundSetting = {
+  mode: "preset",
+  preset: "moon",
+  imageDataUrl: null,
+  opacity: 0.36,
+  blur: 0,
+  dim: 0.08,
+  fit: "cover",
+};
+
+function isDashboardBackgroundPreset(value: unknown): value is DashboardBackgroundPreset {
+  return value === "moon" || value === "paper" || value === "grid" || value === "night" || value === "green";
+}
+
+function isDashboardBackgroundSetting(value: unknown): value is DashboardBackgroundSetting {
+  if (typeof value !== "object" || value === null) return false;
+  const setting = value as Partial<DashboardBackgroundSetting>;
+  return (
+    (setting.mode === "preset" || setting.mode === "image") &&
+    isDashboardBackgroundPreset(setting.preset) &&
+    (typeof setting.imageDataUrl === "string" || setting.imageDataUrl === null) &&
+    typeof setting.opacity === "number" &&
+    typeof setting.blur === "number" &&
+    typeof setting.dim === "number" &&
+    (setting.fit === "cover" || setting.fit === "contain" || setting.fit === "repeat")
+  );
+}
+
+export async function getDashboardBackground() {
+  return parseJsonSetting(await getSetting("dashboard_background"), isDashboardBackgroundSetting) ?? DEFAULT_DASHBOARD_BACKGROUND;
+}
+
+export async function setDashboardBackground(setting: DashboardBackgroundSetting) {
+  await setSetting("dashboard_background", JSON.stringify(setting));
 }

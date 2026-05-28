@@ -1,5 +1,6 @@
 import type { ReviewPeriodType, ReviewSummary, ReviewSummarySnapshot } from "../types/domain";
 import { getDb } from "./db";
+import { addTrashItem } from "./trashRepository";
 
 interface ReviewSummaryRow {
   id: string;
@@ -76,5 +77,10 @@ export async function upsertReviewSummary(input: {
 
 export async function deleteReviewSummary(id: string) {
   const db = await getDb();
+  const rows = await db.select<Array<Record<string, unknown>>>("SELECT * FROM review_summaries WHERE id = $1 LIMIT 1", [id]);
+  const row = rows[0];
+  if (row) {
+    await addTrashItem({ entityType: "review", entityId: id, title: String(row.title ?? "复盘总结"), payload: row });
+  }
   await db.execute("DELETE FROM review_summaries WHERE id = $1", [id]);
 }

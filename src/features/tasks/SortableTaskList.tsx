@@ -14,6 +14,7 @@ import { Check, GripVertical, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
+import { createReminder } from "../../data/remindersRepository";
 import type { Task, TaskStatus } from "../../types/domain";
 import { buildReorderedTasks } from "./taskOrdering";
 import { TaskLabelColorBar } from "./TaskLabelColorBar";
@@ -191,6 +192,35 @@ export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChan
     }
   }
 
+  function resolveReminderTime(preset: "30m" | "1h" | "tonight" | "tomorrow" | "custom") {
+    const date = new Date();
+    if (preset === "30m") date.setMinutes(date.getMinutes() + 30);
+    if (preset === "1h") date.setHours(date.getHours() + 1);
+    if (preset === "tonight") date.setHours(20, 0, 0, 0);
+    if (preset === "tomorrow") {
+      date.setDate(date.getDate() + 1);
+      date.setHours(9, 0, 0, 0);
+    }
+    if (preset === "custom") {
+      const input = window.prompt("请输入提醒时间，例如 2026-05-28 20:30");
+      if (!input) return null;
+      const parsed = new Date(input.replace(" ", "T"));
+      if (Number.isNaN(parsed.getTime())) {
+        window.alert("时间格式无法识别");
+        return null;
+      }
+      return parsed.toISOString();
+    }
+    if (date.getTime() <= Date.now()) date.setDate(date.getDate() + 1);
+    return date.toISOString();
+  }
+
+  async function addReminder(task: Task, preset: "30m" | "1h" | "tonight" | "tomorrow" | "custom") {
+    const remindAt = resolveReminderTime(preset);
+    if (!remindAt) return;
+    await createReminder(task, remindAt);
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -234,6 +264,7 @@ export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChan
           onDelete={(task) => void onDelete(task.id)}
           onCopy={(task) => void copyTask(task)}
           onLabelChange={(task, labelId) => void onLabelChange(task.id, labelId)}
+          onReminder={(task, preset) => void addReminder(task, preset)}
         />
       )}
     </DndContext>

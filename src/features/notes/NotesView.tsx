@@ -5,6 +5,7 @@ import { IconButton } from "../../components/common/IconButton";
 import { Toast } from "../../components/common/Toast";
 import { PanelBody } from "../../components/layout/PanelBody";
 import type { Note, TaskScope } from "../../types/domain";
+import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { useNotes } from "./useNotes";
 
 export function NotesView() {
@@ -40,17 +41,9 @@ export function NotesView() {
 
   return (
     <PanelBody className="relative">
-      <textarea
-        data-quick-note-input
+      <MarkdownEditor
         value={content}
-        onChange={(event) => setContent(event.currentTarget.value)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" && event.ctrlKey) {
-            event.preventDefault();
-            void saveNote();
-          }
-        }}
-        className="note-editor min-h-20 resize-none p-2 text-sm leading-5 outline-none placeholder:text-[var(--text-muted)]"
+        onChange={setContent}
         placeholder="记下一点灵感或随笔"
       />
       <button

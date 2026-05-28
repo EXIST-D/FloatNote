@@ -1,8 +1,11 @@
 import { PhysicalPosition, PhysicalSize } from "@tauri-apps/api/dpi";
 import { emit, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow, primaryMonitor } from "@tauri-apps/api/window";
-import { useCallback, useEffect, useState } from "react";
+import type { CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  DEFAULT_DASHBOARD_BACKGROUND,
+  getDashboardBackground,
   getSetting,
   getPriorityColors,
   getDashboardHeroCopy,
@@ -12,12 +15,22 @@ import {
   isWindowSizeSetting,
   parseJsonSetting,
   setDashboardHeroCopy as saveDashboardHeroCopy,
+  setDashboardBackground as saveDashboardBackground,
   setPriorityColors as savePriorityColors,
   setReviewMode as saveReviewMode,
   setSetting,
 } from "../../data/settingsRepository";
 import { priorityColorsToCssVars } from "../tasks/taskPriority";
-import type { AppTab, FontStyleName, MainWindowStyle, PaperOpacityName, ReviewMode, TaskPriority, ThemeName } from "../../types/domain";
+import type {
+  AppTab,
+  DashboardBackgroundSetting,
+  FontStyleName,
+  MainWindowStyle,
+  PaperOpacityName,
+  ReviewMode,
+  TaskPriority,
+  ThemeName,
+} from "../../types/domain";
 
 const APPEARANCE_CHANGED_EVENT = "appearance:changed";
 
@@ -107,6 +120,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
     kicker: "今日工作盘",
     title: "把零散任务、灵感和专注时间收在一张桌面上",
   });
+  const [dashboardBackground, setDashboardBackgroundState] = useState<DashboardBackgroundSetting>(DEFAULT_DASHBOARD_BACKGROUND);
   const [priorityColors, setPriorityColorsState] = useState<Record<TaskPriority, string>>({
     high: "#c95742",
     medium: "#d6a441",
@@ -129,6 +143,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
         savedPriorityColors,
         savedReviewMode,
         savedHeroCopy,
+        savedDashboardBackground,
       ] = await Promise.all([
         getSetting("theme"),
         getSetting("font_style"),
@@ -141,6 +156,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
         getPriorityColors(),
         getReviewMode(),
         getDashboardHeroCopy(),
+        getDashboardBackground(),
       ]);
 
       const nextTheme = isThemeName(savedTheme) ? savedTheme : "paper";
@@ -156,6 +172,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
       setMainWindowStyleState(nextMainWindowStyle);
       setReviewModeState(savedReviewMode);
       setDashboardHeroCopyState(savedHeroCopy);
+      setDashboardBackgroundState(savedDashboardBackground);
       setPriorityColorsState(savedPriorityColors);
       setAlwaysOnTopState(nextAlwaysOnTop);
       setLastActiveTabState(nextTab);
@@ -279,6 +296,11 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
     await saveDashboardHeroCopy(nextCopy);
   }, []);
 
+  const setDashboardBackground = useCallback(async (nextBackground: DashboardBackgroundSetting) => {
+    setDashboardBackgroundState(nextBackground);
+    await saveDashboardBackground(nextBackground);
+  }, []);
+
   const setPriorityColors = useCallback(async (nextColors: Record<TaskPriority, string>) => {
     setPriorityColorsState(nextColors);
     applyAppearance(theme, fontStyle, paperOpacity, nextColors);
@@ -297,6 +319,25 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
     await setSetting("last_active_tab", tab);
   }, []);
 
+  const dashboardBackgroundStyle = useMemo(() => {
+    const presetMap: Record<string, string> = {
+      moon: "radial-gradient(circle at 18% 6%, rgba(205,184,255,.42), transparent 30%), linear-gradient(135deg, #fffaf0, #f7eddc)",
+      paper: "repeating-linear-gradient(0deg, transparent 0 23px, rgba(214,165,65,.08) 24px), linear-gradient(135deg, #fffaf0, #f4ead6)",
+      grid: "linear-gradient(rgba(93,72,49,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(93,72,49,.08) 1px, transparent 1px), #fffaf0",
+      night: "radial-gradient(circle at 20% 12%, rgba(141,120,216,.38), transparent 34%), linear-gradient(135deg, #292635, #3b344e)",
+      green: "radial-gradient(circle at 18% 10%, rgba(78,128,100,.28), transparent 34%), linear-gradient(135deg, #f8fff3, #dbe9c8)",
+    };
+    const image = dashboardBackground.mode === "image" && dashboardBackground.imageDataUrl ? `url("${dashboardBackground.imageDataUrl}")` : presetMap[dashboardBackground.preset];
+    return {
+      "--dashboard-bg-image": image,
+      "--dashboard-bg-opacity": String(dashboardBackground.opacity),
+      "--dashboard-bg-blur": `${dashboardBackground.blur}px`,
+      "--dashboard-bg-dim": String(dashboardBackground.dim),
+      "--dashboard-bg-size": dashboardBackground.fit === "repeat" ? "auto" : dashboardBackground.fit,
+      "--dashboard-bg-repeat": dashboardBackground.fit === "repeat" ? "repeat" : "no-repeat",
+    } as CSSProperties;
+  }, [dashboardBackground]);
+
   return {
     theme,
     setTheme,
@@ -310,6 +351,9 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
     setReviewMode,
     dashboardHeroCopy,
     setDashboardHeroCopy,
+    dashboardBackground,
+    setDashboardBackground,
+    dashboardBackgroundStyle,
     priorityColors,
     setPriorityColors,
     alwaysOnTop,

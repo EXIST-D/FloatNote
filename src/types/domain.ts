@@ -1,6 +1,6 @@
 export type AppTab = "today" | "week" | "notes" | "focus";
 
-export type DashboardTab = "home" | "today" | "week" | "notes" | "focus" | "history" | "settings";
+export type DashboardTab = "home" | "search" | "today" | "week" | "notes" | "focus" | "reminders" | "history" | "trash" | "settings";
 
 export type ThemeName = "paper" | "ink" | "night" | "book" | "reading" | "green";
 
@@ -92,4 +92,52 @@ export interface HistoryDayGroup {
   tasks: Task[];
   notes: Note[];
   focusSessions: FocusSession[];
+}
+
+export type ReminderStatus = "pending" | "sent" | "dismissed";
+
+export interface Reminder {
+  id: string;
+  taskId: string;
+  taskScope: TaskScope;
+  taskTitle: string;
+  remindAt: string;
+  status: ReminderStatus;
+  createdAt: string;
+  updatedAt: string;
+  sentAt: string | null;
+}
+
+export type TrashEntityType = "task" | "note" | "review";
+
+export interface TrashItem {
+  id: string;
+  entityType: TrashEntityType;
+  entityId: string;
+  title: string;
+  payloadJson: string;
+  deletedAt: string;
+}
+
+export type SearchResultType = "task" | "note" | "review" | "focus";
+
+export interface SearchResult {
+  id: string;
+  type: SearchResultType;
+  title: string;
+  snippet: string;
+  date: string;
+  targetTab: DashboardTab;
+}
+
+export type DashboardBackgroundPreset = "moon" | "paper" | "grid" | "night" | "green";
+
+export interface DashboardBackgroundSetting {
+  mode: "preset" | "image";
+  preset: DashboardBackgroundPreset;
+  imageDataUrl: string | null;
+  opacity: number;
+  blur: number;
+  dim: number;
+  fit: "cover" | "contain" | "repeat";
 }

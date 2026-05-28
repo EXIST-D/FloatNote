@@ -8,17 +8,32 @@ import { FocusView } from "../features/focus/FocusView";
 import { useFocusSession } from "../features/focus/useFocusSession";
 import { HistoryAccordionView } from "../features/history/HistoryAccordionView";
 import { NotesView } from "../features/notes/NotesView";
+import { RemindersView } from "../features/reminders/RemindersView";
+import { useReminderScheduler } from "../features/reminders/useReminderScheduler";
 import { ReviewPrompt } from "../features/review/ReviewPrompt";
 import { useReviewActions } from "../features/review/useReviewActions";
 import { useReviewPrompt } from "../features/review/useReviewPrompt";
+import { SearchView } from "../features/search/SearchView";
 import { DashboardSettingsView } from "../features/settings/DashboardSettingsView";
 import { useSettings } from "../features/settings/useSettings";
 import { TodayView } from "../features/today/TodayView";
+import { TrashView } from "../features/trash/TrashView";
 import { WeekView } from "../features/week/WeekView";
 import type { DashboardTab } from "../types/domain";
 
 function isDashboardTab(value: unknown): value is DashboardTab {
-  return value === "home" || value === "today" || value === "week" || value === "notes" || value === "focus" || value === "history" || value === "settings";
+  return (
+    value === "home" ||
+    value === "search" ||
+    value === "today" ||
+    value === "week" ||
+    value === "notes" ||
+    value === "focus" ||
+    value === "reminders" ||
+    value === "history" ||
+    value === "trash" ||
+    value === "settings"
+  );
 }
 
 export function DashboardShell() {
@@ -27,6 +42,7 @@ export function DashboardShell() {
   const reviewActions = useReviewActions();
   const reviewPrompt = useReviewPrompt();
   const [activeTab, setActiveTab] = useState<DashboardTab>("home");
+  useReminderScheduler();
 
   useEffect(() => {
     const appWindow = getCurrentWindow();
@@ -79,7 +95,7 @@ export function DashboardShell() {
         focusLater("[data-quick-task-input]");
       } else if (event.key.toLowerCase() === "f") {
         event.preventDefault();
-        changeTab("history");
+        changeTab("search");
       }
     }
 
@@ -88,7 +104,7 @@ export function DashboardShell() {
   }, []);
 
   return (
-    <main className="dashboard-shell" data-main-window-style={settings.mainWindowStyle}>
+    <main className="dashboard-shell" data-main-window-style={settings.mainWindowStyle} style={settings.dashboardBackgroundStyle}>
       <DashboardNav activeTab={activeTab} onChange={changeTab} />
       <section className="dashboard-content">
         <ReviewPrompt
@@ -106,11 +122,14 @@ export function DashboardShell() {
         )}
         {reviewActions.error && <p className="review-error">{reviewActions.error}</p>}
         {activeTab === "home" && <DashboardHome onNavigate={changeTab} heroCopy={settings.dashboardHeroCopy} />}
+        {activeTab === "search" && <SearchView onNavigate={changeTab} />}
         {activeTab === "today" && <TodayView />}
         {activeTab === "week" && <WeekView />}
         {activeTab === "notes" && <NotesView />}
         {activeTab === "focus" && <FocusView focus={focus} />}
+        {activeTab === "reminders" && <RemindersView />}
         {activeTab === "history" && <HistoryAccordionView />}
+        {activeTab === "trash" && <TrashView />}
         {activeTab === "settings" && <DashboardSettingsView settings={settings} />}
       </section>
     </main>

@@ -1,5 +1,6 @@
 import type { Note } from "../types/domain";
 import { getDb } from "./db";
+import { addTrashItem } from "./trashRepository";
 
 interface NoteRow {
   id: string;
@@ -47,6 +48,11 @@ export async function updateNote(id: string, content: string) {
 
 export async function deleteNote(id: string) {
   const db = await getDb();
+  const rows = await db.select<Array<Record<string, unknown>>>("SELECT * FROM notes WHERE id = $1 LIMIT 1", [id]);
+  const row = rows[0];
+  if (row) {
+    await addTrashItem({ entityType: "note", entityId: id, title: String(row.content ?? "灵感").slice(0, 48), payload: row });
+  }
   await db.execute("DELETE FROM notes WHERE id = $1", [id]);
 }
 

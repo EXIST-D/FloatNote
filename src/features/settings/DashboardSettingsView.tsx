@@ -1,9 +1,10 @@
-import { ClipboardList, Droplets, Palette, Tags, Type } from "lucide-react";
+import { ClipboardList, Download, Droplets, Image, Palette, Tags, Type } from "lucide-react";
+import { buildExportSnapshot, exportSnapshotAsJson, exportSnapshotAsMarkdown } from "../../data/exportRepository";
 import {
   DEFAULT_DASHBOARD_HERO_KICKER,
   DEFAULT_DASHBOARD_HERO_TITLE,
 } from "../../data/settingsRepository";
-import type { FontStyleName, MainWindowStyle, PaperOpacityName, ReviewMode, TaskLabel } from "../../types/domain";
+import type { DashboardBackgroundPreset, FontStyleName, MainWindowStyle, PaperOpacityName, ReviewMode, TaskLabel } from "../../types/domain";
 import { useTaskLabels } from "../tasks/useTaskLabels";
 import type { useSettings } from "./useSettings";
 
@@ -30,6 +31,14 @@ const opacityStyles: Array<{ id: PaperOpacityName; label: string }> = [
 const reviewModes: Array<{ id: ReviewMode; label: string }> = [
   { id: "manual_with_prompt", label: "手动结束 + 轻提示" },
   { id: "manual_only", label: "仅手动结束" },
+];
+
+const backgroundPresets: Array<{ id: DashboardBackgroundPreset; label: string }> = [
+  { id: "moon", label: "月光" },
+  { id: "paper", label: "纸纹" },
+  { id: "grid", label: "浅格" },
+  { id: "night", label: "夜读" },
+  { id: "green", label: "墨绿" },
 ];
 
 interface DashboardSettingsViewProps {
@@ -79,6 +88,36 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
     } catch (err) {
       window.alert(err instanceof Error ? err.message : "删除标签失败");
     }
+  }
+
+  async function exportData(format: "markdown" | "json") {
+    const snapshot = await buildExportSnapshot();
+    const content = format === "markdown" ? exportSnapshotAsMarkdown(snapshot) : exportSnapshotAsJson(snapshot);
+    const blob = new Blob([content], { type: format === "markdown" ? "text/markdown;charset=utf-8" : "application/json;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `浮笺导出-${new Date().toISOString().slice(0, 10)}.${format === "markdown" ? "md" : "json"}`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleBackgroundFile(file: File | null) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      window.alert("请选择图片文件");
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      window.alert("图片请控制在 3MB 以内");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== "string") return;
+      void settings.setDashboardBackground({ ...settings.dashboardBackground, mode: "image", imageDataUrl: reader.result });
+    };
+    reader.readAsDataURL(file);
   }
 
   return (
@@ -195,6 +234,77 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
               }
             >
               恢复默认文案
+            </button>
+          </div>
+        </article>
+
+        <article className="settings-card settings-card-wide">
+          <h2>
+            <Image size={18} /> 主窗口背景
+          </h2>
+          <div className="settings-options">
+            {backgroundPresets.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`setting-chip ${settings.dashboardBackground.mode === "preset" && settings.dashboardBackground.preset === item.id ? "is-active" : ""}`}
+                onClick={() => void settings.setDashboardBackground({ ...settings.dashboardBackground, mode: "preset", preset: item.id })}
+              >
+                {item.label}
+              </button>
+            ))}
+            <label className="setting-chip setting-file-chip">
+              选择图片
+              <input type="file" accept="image/*" onChange={(event) => handleBackgroundFile(event.currentTarget.files?.[0] ?? null)} />
+            </label>
+          </div>
+          <div className="settings-range-grid">
+            <label>
+              <span>可见度</span>
+              <input
+                type="range"
+                min="0"
+                max="0.8"
+                step="0.02"
+                value={settings.dashboardBackground.opacity}
+                onChange={(event) => void settings.setDashboardBackground({ ...settings.dashboardBackground, opacity: Number(event.currentTarget.value) })}
+              />
+            </label>
+            <label>
+              <span>模糊</span>
+              <input
+                type="range"
+                min="0"
+                max="16"
+                step="1"
+                value={settings.dashboardBackground.blur}
+                onChange={(event) => void settings.setDashboardBackground({ ...settings.dashboardBackground, blur: Number(event.currentTarget.value) })}
+              />
+            </label>
+            <label>
+              <span>压暗</span>
+              <input
+                type="range"
+                min="0"
+                max="0.5"
+                step="0.02"
+                value={settings.dashboardBackground.dim}
+                onChange={(event) => void settings.setDashboardBackground({ ...settings.dashboardBackground, dim: Number(event.currentTarget.value) })}
+              />
+            </label>
+          </div>
+        </article>
+
+        <article className="settings-card settings-card-wide">
+          <h2>
+            <Download size={18} /> 导出数据
+          </h2>
+          <div className="settings-actions">
+            <button type="button" onClick={() => void exportData("markdown")}>
+              导出 Markdown
+            </button>
+            <button type="button" onClick={() => void exportData("json")}>
+              导出 JSON
             </button>
           </div>
         </article>

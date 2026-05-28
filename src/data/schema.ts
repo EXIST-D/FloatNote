@@ -76,6 +76,35 @@ export async function initializeSchema() {
 
   await db.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_review_summaries_period ON review_summaries(period_type, period_key)");
 
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS reminders (
+      id TEXT PRIMARY KEY,
+      task_id TEXT NOT NULL,
+      task_scope TEXT NOT NULL,
+      task_title TEXT NOT NULL,
+      remind_at TEXT NOT NULL,
+      status TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      sent_at TEXT
+    )
+  `);
+
+  await db.execute("CREATE INDEX IF NOT EXISTS idx_reminders_due ON reminders(status, remind_at)");
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS trash_items (
+      id TEXT PRIMARY KEY,
+      entity_type TEXT NOT NULL,
+      entity_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      payload_json TEXT NOT NULL,
+      deleted_at TEXT NOT NULL
+    )
+  `);
+
+  await db.execute("CREATE INDEX IF NOT EXISTS idx_trash_items_deleted_at ON trash_items(deleted_at DESC)");
+
   const taskColumns = await db.select<Array<{ name: string }>>("PRAGMA table_info(tasks)");
   if (!taskColumns.some((column) => column.name === "priority")) {
     await db.execute("ALTER TABLE tasks ADD COLUMN priority TEXT NOT NULL DEFAULT 'medium'");

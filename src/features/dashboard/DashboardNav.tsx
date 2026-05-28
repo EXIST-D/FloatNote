@@ -1,4 +1,4 @@
-import { BarChart3, CalendarDays, Clock3, Home, Lightbulb, ListTodo, PanelTopOpen, Settings } from "lucide-react";
+import { BarChart3, Bell, CalendarDays, Clock3, Home, Lightbulb, ListTodo, PanelTopOpen, Search, Settings, Trash2 } from "lucide-react";
 import appIconUrl from "../../assets/app-icon.png";
 import type { DashboardTab } from "../../types/domain";
 import { openFloatingWindow } from "./useDashboardWindow";
@@ -10,11 +10,14 @@ interface DashboardNavProps {
 
 const navItems: Array<{ id: DashboardTab; label: string; icon: typeof Home }> = [
   { id: "home", label: "速览", icon: Home },
+  { id: "search", label: "搜索", icon: Search },
   { id: "today", label: "今日", icon: ListTodo },
   { id: "week", label: "本周", icon: CalendarDays },
   { id: "notes", label: "灵感", icon: Lightbulb },
   { id: "focus", label: "专注", icon: Clock3 },
+  { id: "reminders", label: "提醒", icon: Bell },
   { id: "history", label: "历史", icon: BarChart3 },
+  { id: "trash", label: "回收站", icon: Trash2 },
   { id: "settings", label: "设置", icon: Settings },
 ];
 

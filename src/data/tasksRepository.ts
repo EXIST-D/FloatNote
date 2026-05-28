@@ -4,6 +4,8 @@ import { noteToTaskTitle } from "../features/notes/noteToTaskTitle";
 import { labelIdFromPriority } from "../features/tasks/taskLabels";
 import { normalizeTaskPriority } from "../features/tasks/taskPriority";
 import { getDefaultTaskLabelFromDb } from "./taskLabelsRepository";
+import { deleteRemindersForTask } from "./remindersRepository";
+import { addTrashItem } from "./trashRepository";
 
 interface TaskRow {
   id: string;
@@ -171,6 +173,12 @@ export async function createTaskFromNote(scope: TaskScope, content: string, prio
 
 export async function deleteTask(id: string) {
   const db = await getDb();
+  const rows = await db.select<Array<Record<string, unknown>>>("SELECT * FROM tasks WHERE id = $1 LIMIT 1", [id]);
+  const row = rows[0];
+  if (row) {
+    await addTrashItem({ entityType: "task", entityId: id, title: String(row.title ?? "未命名任务"), payload: row });
+  }
+  await deleteRemindersForTask(id);
   await db.execute("DELETE FROM tasks WHERE id = $1", [id]);
 }
 

@@ -49,7 +49,7 @@ export function HistoryAccordionView() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (window.confirm("删除这条复盘总结？删除后不可恢复。")) void removeHistoryItem("review", review.id);
+                          if (window.confirm("删除这条复盘总结？可在回收站恢复。")) void removeHistoryItem("review", review.id);
                         }}
                       >
                         删除
@@ -62,7 +62,7 @@ export function HistoryAccordionView() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (window.confirm("删除这条任务记录？删除后不可恢复。")) void removeHistoryItem("task", task.id);
+                          if (window.confirm("删除这条任务记录？可在回收站恢复。")) void removeHistoryItem("task", task.id);
                         }}
                       >
                         删除
@@ -75,7 +75,7 @@ export function HistoryAccordionView() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (window.confirm("删除这条灵感记录？删除后不可恢复。")) void removeHistoryItem("note", note.id);
+                          if (window.confirm("删除这条灵感记录？可在回收站恢复。")) void removeHistoryItem("note", note.id);
                         }}
                       >
                         删除

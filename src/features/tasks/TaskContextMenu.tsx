@@ -1,4 +1,4 @@
-import { Check, Clipboard, Pencil, RotateCcw, Trash2 } from "lucide-react";
+import { Bell, Check, Clipboard, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import type { Task, TaskLabel } from "../../types/domain";
 import { TaskLabelPicker } from "./TaskLabelPicker";
 
@@ -13,9 +13,10 @@ interface TaskContextMenuProps {
   onDelete: (task: Task) => void;
   onCopy: (task: Task) => void;
   onLabelChange: (task: Task, labelId: string) => void;
+  onReminder: (task: Task, preset: "30m" | "1h" | "tonight" | "tomorrow" | "custom") => void;
 }
 
-export function TaskContextMenu({ task, x, y, labels, onClose, onToggleStatus, onEdit, onDelete, onCopy, onLabelChange }: TaskContextMenuProps) {
+export function TaskContextMenu({ task, x, y, labels, onClose, onToggleStatus, onEdit, onDelete, onCopy, onLabelChange, onReminder }: TaskContextMenuProps) {
   const left = Math.max(12, Math.min(x, Math.max(12, window.innerWidth - 228)));
   const top = Math.max(12, Math.min(y, Math.max(12, window.innerHeight - 276)));
 
@@ -47,6 +48,30 @@ export function TaskContextMenu({ task, x, y, labels, onClose, onToggleStatus, o
               onClose();
             }}
           />
+        </div>
+        <div className="task-menu-section">
+          <p className="mb-1 text-[var(--text-muted)]">添加提醒</p>
+          <div className="task-reminder-presets">
+            {[
+              ["30m", "30分钟"],
+              ["1h", "1小时"],
+              ["tonight", "今晚"],
+              ["tomorrow", "明早"],
+              ["custom", "自定"],
+            ].map(([preset, label]) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => {
+                  onReminder(task, preset as "30m" | "1h" | "tonight" | "tomorrow" | "custom");
+                  onClose();
+                }}
+              >
+                <Bell size={12} />
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
         {items.map((item) => {
           const Icon = item.icon;

@@ -47,7 +47,7 @@ export function AppShell() {
         focusLater("[data-quick-task-input]");
       } else if (event.key.toLowerCase() === "f") {
         event.preventDefault();
-        void openDashboardWindow("history");
+        void openDashboardWindow("search");
       }
     }
 

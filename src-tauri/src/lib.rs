@@ -1,7 +1,7 @@
 use tauri::{
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Manager,
+    AppHandle, Emitter, Manager,
 };
 
 fn show_dashboard(app: &AppHandle) {
@@ -26,36 +26,33 @@ pub fn run() {
             show_dashboard(app);
         }))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_sql::Builder::default().build())
         .setup(|app| {
+            let show_floating = MenuItem::with_id(app, "show_floating", "显示浮窗", true, None::<&str>)?;
             let open_dashboard = MenuItem::with_id(app, "open_dashboard", "打开主窗口", true, None::<&str>)?;
-            let show_hide = MenuItem::with_id(app, "show_hide", "显示/隐藏浮窗", true, None::<&str>)?;
-            let toggle_pin = MenuItem::with_id(app, "toggle_pin", "置顶/取消置顶浮窗", true, None::<&str>)?;
+            let new_note = MenuItem::with_id(app, "new_note", "新建灵感", true, None::<&str>)?;
+            let hide_floating = MenuItem::with_id(app, "hide_floating", "隐藏浮窗", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&open_dashboard, &show_hide, &toggle_pin, &quit])?;
+            let menu = Menu::with_items(app, &[&show_floating, &open_dashboard, &new_note, &hide_floating, &quit])?;
 
             let mut tray_builder = TrayIconBuilder::new()
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id().as_ref() {
+                    "show_floating" => {
+                        show_floating_window(app);
+                    }
                     "open_dashboard" => {
                         show_dashboard(app);
                     }
-                    "show_hide" => {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let visible = window.is_visible().unwrap_or(false);
-                            if visible {
-                                let _ = window.hide();
-                            } else {
-                                let _ = window.show();
-                                let _ = window.set_focus();
-                            }
-                        }
+                    "new_note" => {
+                        show_dashboard(app);
+                        let _ = app.emit("dashboard:navigate", "notes");
                     }
-                    "toggle_pin" => {
+                    "hide_floating" => {
                         if let Some(window) = app.get_webview_window("main") {
-                            let always_on_top = window.is_always_on_top().unwrap_or(false);
-                            let _ = window.set_always_on_top(!always_on_top);
+                            let _ = window.hide();
                         }
                     }
                     "quit" => app.exit(0),
