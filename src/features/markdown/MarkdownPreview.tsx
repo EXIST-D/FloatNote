@@ -1,5 +1,4 @@
-import { useMemo } from "react";
-import { renderMarkdownToHtml } from "./markdownRender";
+import { MarkdownReader } from "./MarkdownReader";
 
 interface MarkdownPreviewProps {
   content: string;
@@ -8,8 +7,5 @@ interface MarkdownPreviewProps {
 }
 
 export function MarkdownPreview({ content, emptyText = "暂无内容", className = "" }: MarkdownPreviewProps) {
-  const html = useMemo(() => renderMarkdownToHtml(content), [content]);
-  const safeHtml = html || `<p>${emptyText}</p>`;
-
-  return <div className={`markdown-preview ${className}`} dangerouslySetInnerHTML={{ __html: safeHtml }} />;
+  return <MarkdownReader content={content} emptyText={emptyText} className={`markdown-preview ${className}`} />;
 }

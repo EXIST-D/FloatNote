@@ -25,8 +25,9 @@ export function useNotes() {
   }, [reload]);
 
   async function addNote(content: string) {
-    await createNote(content);
+    const note = await createNote(content);
     await reload();
+    return note;
   }
 
   async function editNote(id: string, content: string) {

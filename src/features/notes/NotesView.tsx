@@ -5,6 +5,7 @@ import { IconButton } from "../../components/common/IconButton";
 import { Toast } from "../../components/common/Toast";
 import { PanelBody } from "../../components/layout/PanelBody";
 import type { Note, TaskScope } from "../../types/domain";
+import { openDashboardWindow } from "../dashboard/useDashboardWindow";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
 import { MarkdownPreview } from "../markdown/MarkdownPreview";
 import { useNotes } from "./useNotes";
@@ -124,6 +125,10 @@ export function NotesView() {
                     <button type="button" className="note-action" onClick={() => void convert(note, "week")}>
                       <ArrowRight size={12} />
                       本周
+                    </button>
+                    <button type="button" className="note-action" onClick={() => void openDashboardWindow("notes")}>
+                      <Pencil size={12} />
+                      主窗口
                     </button>
                     <button type="button" className="note-action" onClick={() => startEdit(note)}>
                       <Pencil size={12} />

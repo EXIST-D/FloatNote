@@ -7,7 +7,7 @@ import { DashboardNav } from "../features/dashboard/DashboardNav";
 import { FocusView } from "../features/focus/FocusView";
 import { useFocusSession } from "../features/focus/useFocusSession";
 import { HistoryAccordionView } from "../features/history/HistoryAccordionView";
-import { NotesView } from "../features/notes/NotesView";
+import { MarkdownStudio } from "../features/markdown/MarkdownStudio";
 import { RemindersView } from "../features/reminders/RemindersView";
 import { useReminderScheduler } from "../features/reminders/useReminderScheduler";
 import { ReviewPrompt } from "../features/review/ReviewPrompt";
@@ -125,7 +125,7 @@ export function DashboardShell() {
         {activeTab === "search" && <SearchView onNavigate={changeTab} />}
         {activeTab === "today" && <TodayView />}
         {activeTab === "week" && <WeekView />}
-        {activeTab === "notes" && <NotesView />}
+        {activeTab === "notes" && <MarkdownStudio />}
         {activeTab === "focus" && <FocusView focus={focus} />}
         {activeTab === "reminders" && <RemindersView />}
         {activeTab === "history" && <HistoryAccordionView />}
