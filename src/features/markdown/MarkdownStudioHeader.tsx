@@ -1,27 +1,21 @@
-import { Code2, Eye, Pencil, Plus } from "lucide-react";
-
-export type MarkdownStudioMode = "write" | "read" | "source";
+import { Plus, Save } from "lucide-react";
 
 interface MarkdownStudioHeaderProps {
-  mode: MarkdownStudioMode;
   title: string;
   saveStatus: string;
   canSaveNew: boolean;
   isNewDraft: boolean;
   saving: boolean;
-  onModeChange: (mode: MarkdownStudioMode) => void;
   onNew: () => void;
   onSaveNew: () => void;
 }
 
 export function MarkdownStudioHeader({
-  mode,
   title,
   saveStatus,
   canSaveNew,
   isNewDraft,
   saving,
-  onModeChange,
   onNew,
   onSaveNew,
 }: MarkdownStudioHeaderProps) {
@@ -33,22 +27,9 @@ export function MarkdownStudioHeader({
       </div>
       <div className="markdown-studio-header-actions">
         <span className="markdown-save-status">{saveStatus}</span>
-        <div className="markdown-mode-switch" aria-label="Markdown 模式切换">
-          <button type="button" className={mode === "write" ? "is-active" : ""} onClick={() => onModeChange("write")}>
-            <Pencil size={14} />
-            写作
-          </button>
-          <button type="button" className={mode === "read" ? "is-active" : ""} onClick={() => onModeChange("read")}>
-            <Eye size={14} />
-            阅读
-          </button>
-          <button type="button" className={mode === "source" ? "is-active" : ""} onClick={() => onModeChange("source")}>
-            <Code2 size={14} />
-            源码
-          </button>
-        </div>
         {isNewDraft ? (
           <button type="button" className="primary-action" disabled={!canSaveNew || saving} onClick={onSaveNew}>
+            <Save size={14} />
             收进灵感
           </button>
         ) : (

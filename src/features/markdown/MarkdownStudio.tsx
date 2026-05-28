@@ -1,14 +1,17 @@
+import type { EditorView } from "@codemirror/view";
 import { ArrowRight, FileText, Trash2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
 import { Toast } from "../../components/common/Toast";
 import { PanelBody } from "../../components/layout/PanelBody";
 import type { Note, TaskScope } from "../../types/domain";
 import { useNotes } from "../notes/useNotes";
-import { MarkdownReader } from "./MarkdownReader";
-import { MarkdownRichEditor } from "./MarkdownRichEditor";
-import { MarkdownStudioHeader, type MarkdownStudioMode } from "./MarkdownStudioHeader";
+import { MarkdownCodeMirror, type MarkdownCodeMirrorHandle } from "./codemirror/MarkdownCodeMirror";
+import { MarkdownOutlinePanel } from "./codemirror/MarkdownOutlinePanel";
+import { MarkdownToolbar } from "./codemirror/MarkdownToolbar";
+import { countMarkdownWords, extractMarkdownOutline } from "./codemirror/markdownOutline";
+import { MarkdownStudioHeader } from "./MarkdownStudioHeader";
 import { useMarkdownAutosave, type MarkdownSaveStatus } from "./useMarkdownAutosave";
 
 function getNoteTitle(content: string) {
@@ -53,14 +56,29 @@ function getSaveStatusLabel(status: MarkdownSaveStatus, isNewDraft: boolean, err
 
 export function MarkdownStudio() {
   const { notes, loading, error, addNote, editNote, convertNote, removeNote } = useNotes();
+  const editorRef = useRef<MarkdownCodeMirrorHandle | null>(null);
+  const [editorView, setEditorView] = useState<EditorView | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [mode, setMode] = useState<MarkdownStudioMode>("write");
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [outlineOpen, setOutlineOpen] = useState(false);
+  const [outlinePinned, setOutlinePinned] = useState(false);
+  const [collapsedOutlineGroups, setCollapsedOutlineGroups] = useState<Set<string>>(() => new Set());
 
   const selectedNote = useMemo(() => notes.find((note) => note.id === selectedId) ?? null, [notes, selectedId]);
   const isNewDraft = selectedId === null;
+  const outline = useMemo(() => extractMarkdownOutline(draft), [draft]);
+  const wordCount = useMemo(() => countMarkdownWords(draft), [draft]);
+  const lineCount = useMemo(() => Math.max(1, draft.split(/\r?\n/).length), [draft]);
+
+  const autosave = useMarkdownAutosave({
+    noteId: selectedId,
+    value: draft,
+    initialValue: selectedNote?.content ?? "",
+    enabled: Boolean(selectedId),
+    onSave: editNote,
+  });
 
   useEffect(() => {
     if (selectedId && notes.some((note) => note.id === selectedId)) return;
@@ -71,34 +89,27 @@ export function MarkdownStudio() {
     }
     setSelectedId(firstNote.id);
     setDraft(firstNote.content);
-    setMode("read");
   }, [notes, selectedId]);
 
   useEffect(() => {
-    if (!feedback) return;
+    if (!feedback) return undefined;
 
     const timeoutId = window.setTimeout(() => setFeedback(null), 1800);
     return () => window.clearTimeout(timeoutId);
   }, [feedback]);
 
-  const autosave = useMarkdownAutosave({
-    noteId: selectedId,
-    value: draft,
-    initialValue: selectedNote?.content ?? "",
-    enabled: Boolean(selectedId && mode !== "read"),
-    onSave: editNote,
-  });
-
-  function startNewNote() {
+  async function startNewNote() {
+    if (selectedId) await autosave.saveNow(draft);
     setSelectedId(null);
     setDraft("");
-    setMode("write");
+    window.setTimeout(() => editorRef.current?.focus(), 0);
   }
 
-  function selectNote(note: Note) {
+  async function selectNote(note: Note) {
+    if (selectedId && selectedId !== note.id) await autosave.saveNow(draft);
     setSelectedId(note.id);
     setDraft(note.content);
-    setMode("read");
+    window.setTimeout(() => editorRef.current?.focus(), 0);
   }
 
   async function saveNewNote() {
@@ -110,7 +121,6 @@ export function MarkdownStudio() {
       const note = await addNote(nextContent);
       setSelectedId(note.id);
       setDraft(note.content);
-      setMode("read");
       setFeedback("已收进灵感");
     } finally {
       setSaving(false);
@@ -138,31 +148,33 @@ export function MarkdownStudio() {
     setFeedback("灵感已移入回收站");
   }
 
-  function switchMode(nextMode: MarkdownStudioMode) {
-    if (nextMode === "read" && selectedId) void autosave.saveNow(draft);
-    setMode(nextMode);
+  function toggleOutlineGroup(id: string) {
+    setCollapsedOutlineGroups((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   }
 
-  const title = isNewDraft ? "新灵感" : getNoteTitle(selectedNote?.content ?? draft);
+  const title = isNewDraft ? "新灵感草稿" : getNoteTitle(draft || selectedNote?.content || "");
   const saveStatus = getSaveStatusLabel(autosave.status, isNewDraft, autosave.error);
 
   return (
     <PanelBody className="markdown-studio">
       <MarkdownStudioHeader
-        mode={mode}
         title={title}
         saveStatus={saveStatus}
         canSaveNew={Boolean(draft.trim())}
         isNewDraft={isNewDraft}
         saving={saving}
-        onModeChange={switchMode}
-        onNew={startNewNote}
+        onNew={() => void startNewNote()}
         onSaveNew={() => void saveNewNote()}
       />
       {error && <p className="rounded-md bg-red-50 p-2 text-xs text-red-700">{error}</p>}
-      <div className="markdown-studio-layout">
+      <div className={`markdown-studio-layout ${outlineOpen ? "is-outline-open" : ""} ${outlinePinned ? "is-outline-pinned" : ""}`}>
         <aside className="markdown-studio-sidebar">
-          <button type="button" className={`markdown-note-item ${isNewDraft ? "is-active" : ""}`} onClick={startNewNote}>
+          <button type="button" className={`markdown-note-item ${isNewDraft ? "is-active" : ""}`} onClick={() => void startNewNote()}>
             <FileText size={15} />
             <span className="min-w-0">
               <strong>新灵感草稿</strong>
@@ -180,7 +192,7 @@ export function MarkdownStudio() {
                   key={note.id}
                   type="button"
                   className={`markdown-note-item ${selectedId === note.id ? "is-active" : ""}`}
-                  onClick={() => selectNote(note)}
+                  onClick={() => void selectNote(note)}
                 >
                   <span className="markdown-note-dot" />
                   <span className="min-w-0">
@@ -200,10 +212,6 @@ export function MarkdownStudio() {
               event.preventDefault();
               void saveNewNote();
             }
-            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "e") {
-              event.preventDefault();
-              switchMode(mode === "read" ? "write" : "read");
-            }
           }}
         >
           <div className="markdown-studio-editor-actions">
@@ -221,25 +229,31 @@ export function MarkdownStudio() {
               </IconButton>
             )}
           </div>
-          {mode === "read" ? (
-            <MarkdownReader content={draft || selectedNote?.content || ""} className="markdown-studio-reader" />
-          ) : mode === "source" ? (
-            <textarea
-              className="markdown-source-editor"
+          <div className="markdown-editor-frame">
+            <MarkdownToolbar view={editorView} outlineOpen={outlineOpen} onToggleOutline={() => setOutlineOpen((open) => !open)} />
+            <MarkdownCodeMirror
+              ref={editorRef}
               value={draft}
-              onChange={(event) => setDraft(event.currentTarget.value)}
-              placeholder="在这里查看和编辑原始 Markdown"
-              spellCheck
-            />
-          ) : (
-            <MarkdownRichEditor
-              markdown={draft}
-              onChange={setDraft}
               autoFocus
+              onChange={setDraft}
+              onViewReady={setEditorView}
               onSaveShortcut={() => (isNewDraft ? void saveNewNote() : void autosave.saveNow(draft))}
             />
-          )}
+          </div>
         </section>
+        {outlineOpen && (
+          <MarkdownOutlinePanel
+            items={outline}
+            wordCount={wordCount}
+            lineCount={lineCount}
+            pinned={outlinePinned}
+            collapsedGroups={collapsedOutlineGroups}
+            onJump={(line) => editorRef.current?.scrollToLine(line)}
+            onClose={() => setOutlineOpen(false)}
+            onTogglePinned={() => setOutlinePinned((pinned) => !pinned)}
+            onToggleGroup={toggleOutlineGroup}
+          />
+        )}
       </div>
       <Toast message={feedback} />
     </PanelBody>

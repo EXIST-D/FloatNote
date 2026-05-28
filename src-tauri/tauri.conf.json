@@ -28,9 +28,9 @@
       {
         "label": "dashboard",
         "title": "浮笺工作台",
-        "width": 1100,
-        "height": 760,
-        "minWidth": 860,
+        "width": 1280,
+        "height": 820,
+        "minWidth": 1000,
         "minHeight": 560,
         "preventOverflow": true,
         "resizable": true,
