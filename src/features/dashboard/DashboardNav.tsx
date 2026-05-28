@@ -1,7 +1,7 @@
 import { BarChart3, CalendarDays, Clock3, Home, Lightbulb, ListTodo, PanelTopOpen, Settings } from "lucide-react";
 import appIconUrl from "../../assets/app-icon.png";
-import { openFloatingWindow } from "./useDashboardWindow";
 import type { DashboardTab } from "../../types/domain";
+import { openFloatingWindow } from "./useDashboardWindow";
 
 interface DashboardNavProps {
   activeTab: DashboardTab;

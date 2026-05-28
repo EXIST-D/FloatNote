@@ -69,7 +69,7 @@ function SortableTaskRow({
     <article
       ref={setNodeRef}
       style={style}
-      className={`grid min-w-0 grid-cols-[4px_auto_auto_minmax(0,1fr)_auto] items-start gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-1.5 py-1.5 text-sm ${
+      className={`task-row grid min-w-0 grid-cols-[4px_auto_auto_minmax(0,1fr)_auto] items-start gap-1.5 px-1.5 py-1.5 text-sm ${
         task.status === "done" ? "text-[var(--text-muted)] opacity-75" : "text-[var(--text-main)]"
       } ${isDragging ? "z-20 shadow-[var(--surface-shadow)]" : ""}`}
       onContextMenu={(event) => {
@@ -80,7 +80,7 @@ function SortableTaskRow({
       <TaskLabelColorBar label={task.label} />
       <button
         type="button"
-        className="mt-0.5 grid h-6 w-5 place-items-center rounded text-[var(--text-muted)] hover:bg-black/5 hover:text-[var(--text-main)]"
+        className="task-drag-handle mt-0.5 grid h-6 w-5 place-items-center"
         aria-label="拖拽排序"
         title="拖拽排序"
         {...attributes}
@@ -90,8 +90,8 @@ function SortableTaskRow({
       </button>
       <button
         type="button"
-        className={`mt-0.5 grid h-5 w-5 place-items-center rounded border border-[var(--app-border)] ${
-          task.status === "done" ? "bg-[var(--accent)] text-[var(--accent-contrast)]" : "bg-white/40"
+        className={`task-checkbox mt-0.5 grid h-5 w-5 place-items-center ${
+          task.status === "done" ? "is-done" : ""
         }`}
         onClick={() => onStatusChange(task)}
         aria-label={task.status === "done" ? "取消完成" : "完成"}
@@ -104,7 +104,7 @@ function SortableTaskRow({
         <input
           autoFocus
           value={editValue}
-          className="min-w-0 rounded border border-[var(--app-border)] bg-[var(--app-bg-soft)] px-2 py-1 text-sm outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          className="task-edit-input min-w-0 px-2 py-1 text-sm outline-none"
           onChange={(event) => onEditValueChange(event.target.value)}
           onBlur={onEditCommit}
           onKeyDown={(event) => {
@@ -115,7 +115,7 @@ function SortableTaskRow({
       ) : (
         <button
           type="button"
-          className={`min-w-0 text-left leading-snug ${expanded ? "whitespace-pre-wrap break-words" : "task-title-collapsed"} ${
+          className={`task-title-button min-w-0 text-left leading-snug ${expanded ? "whitespace-pre-wrap break-words" : "task-title-collapsed"} ${
             task.status === "done" ? "line-through" : ""
           }`}
           onClick={() => onExpandToggle(task.id)}

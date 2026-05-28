@@ -41,6 +41,7 @@ export function NotesView() {
   return (
     <PanelBody className="relative">
       <textarea
+        data-quick-note-input
         value={content}
         onChange={(event) => setContent(event.currentTarget.value)}
         onKeyDown={(event) => {
@@ -49,12 +50,12 @@ export function NotesView() {
             void saveNote();
           }
         }}
-        className="min-h-20 resize-none rounded-md border border-[var(--app-border)] bg-white/45 p-2 text-sm leading-5 outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
+        className="note-editor min-h-20 resize-none p-2 text-sm leading-5 outline-none placeholder:text-[var(--text-muted)]"
         placeholder="记下一点灵感或随笔"
       />
       <button
         type="button"
-        className="h-8 rounded-md bg-[var(--accent)] text-sm text-[var(--accent-contrast)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        className="primary-action h-8 rounded-md text-sm disabled:cursor-not-allowed disabled:opacity-60"
         disabled={saving || !content.trim()}
         onClick={() => void saveNote()}
       >
@@ -66,10 +67,10 @@ export function NotesView() {
       ) : notes.length === 0 ? (
         <EmptyState title="还没有灵感记录" />
       ) : (
-        <div className="grid min-h-0 gap-1.5 overflow-auto pr-1">
+        <div className="notes-list grid min-h-0 gap-1.5 overflow-auto pr-1">
           {notes.map((note) => (
-            <article key={note.id} className="grid min-w-0 gap-1.5 rounded-md border border-[var(--app-border)] bg-white/25 px-2 py-1.5 text-sm leading-5">
-              <p className="line-clamp-3 min-w-0 whitespace-pre-wrap break-words">{note.content}</p>
+            <article key={note.id} className="note-card grid min-w-0 gap-1.5 px-2 py-1.5 text-sm leading-5">
+              <p className="line-clamp-4 min-w-0 whitespace-pre-wrap break-words">{note.content}</p>
               <div className="flex min-w-0 items-center justify-end gap-1">
                 <button type="button" className="note-action" onClick={() => void convert(note, "today")}>
                   <ArrowRight size={12} />

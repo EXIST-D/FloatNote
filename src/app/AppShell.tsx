@@ -4,6 +4,7 @@ import { TabBar } from "../components/layout/TabBar";
 import { TimerStrip } from "../components/layout/TimerStrip";
 import { FocusView } from "../features/focus/FocusView";
 import { useFocusSession } from "../features/focus/useFocusSession";
+import { openDashboardWindow } from "../features/dashboard/useDashboardWindow";
 import { NotesView } from "../features/notes/NotesView";
 import { useSettings } from "../features/settings/useSettings";
 import { useGlobalShortcut } from "../features/shortcuts/useGlobalShortcut";
@@ -25,6 +26,34 @@ export function AppShell() {
     setActiveTab(tab);
     void settings.setLastActiveTab(tab);
   }
+
+  useEffect(() => {
+    function focusLater(selector: string) {
+      window.setTimeout(() => {
+        const target = document.querySelector<HTMLElement>(selector);
+        target?.focus();
+      }, 80);
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      if (event.key.toLowerCase() === "n" && event.shiftKey) {
+        event.preventDefault();
+        changeTab("notes");
+        focusLater("[data-quick-note-input]");
+      } else if (event.key.toLowerCase() === "n") {
+        event.preventDefault();
+        changeTab("today");
+        focusLater("[data-quick-task-input]");
+      } else if (event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        void openDashboardWindow("history");
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [settings]);
 
   return (
     <FloatingWindow

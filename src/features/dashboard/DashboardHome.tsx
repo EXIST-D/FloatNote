@@ -1,7 +1,7 @@
 import { ArrowRight, Clock3, Lightbulb, ListTodo, NotebookTabs } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
-import type { DashboardTab } from "../../types/domain";
 import { formatDuration } from "../../lib/time";
+import type { DashboardTab } from "../../types/domain";
 import { formatFocusHistorySummary } from "../history/historyFormat";
 import { useHistory } from "../history/useHistory";
 import { useReviewActions } from "../review/useReviewActions";
@@ -68,13 +68,15 @@ export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
   const reviewActions = useReviewActions();
 
   if (loading) {
-    return <main className="dashboard-page dashboard-centered">正在整理今日书桌...</main>;
+    return <main className="dashboard-page dashboard-centered">正在整理今日纸面...</main>;
   }
 
   if (error || !summary) {
-    return <main className="dashboard-page dashboard-centered text-red-700">{error ?? "速览不可用"}</main>;
+    return <main className="dashboard-page dashboard-centered text-red-700">{error ?? "速览暂不可用"}</main>;
   }
 
+  const activeToday = summary.todayTasks.filter((task) => task.status === "active").length;
+  const activeWeek = summary.weekTasks.filter((task) => task.status === "active").length;
   const recentHistory = groups.slice(0, 4);
   const recentHistoryText =
     recentHistory.length > 0
@@ -85,7 +87,7 @@ export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
             return reviewTitle ? `${group.date} · ${reviewTitle}` : `${group.date} · ${recordCount} 条`;
           })
           .join(" / ")
-      : "暂无历史";
+      : "暂无历史记录";
 
   return (
     <main className="dashboard-page">
@@ -94,14 +96,17 @@ export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
           <p>{heroCopy.kicker}</p>
           <h1>{heroCopy.title}</h1>
         </div>
-        <strong>{formatDuration(summary.todayFocusSeconds)}</strong>
+        <div className="dashboard-hero-metric">
+          <span>今日专注</span>
+          <strong>{formatDuration(summary.todayFocusSeconds)}</strong>
+        </div>
       </section>
 
-      <section className="dashboard-work-grid">
+      <section className="dashboard-work-grid" aria-label="工作台速览">
         <WorkCard
           title="今日任务"
-          subtitle={`${summary.todayTasks.filter((task) => task.status === "active").length} 项待处理`}
-          accent="var(--priority-medium)"
+          subtitle={`${activeToday} 项待处理`}
+          accent="var(--color-amber)"
           icon={ListTodo}
           onClick={() => onNavigate("today")}
           action={
@@ -114,8 +119,8 @@ export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
         </WorkCard>
         <WorkCard
           title="本周任务"
-          subtitle={`${summary.weekTasks.filter((task) => task.status === "active").length} 项待处理`}
-          accent="var(--priority-low)"
+          subtitle={`${activeWeek} 项待处理`}
+          accent="var(--color-moss)"
           icon={NotebookTabs}
           onClick={() => onNavigate("week")}
           action={
@@ -126,13 +131,13 @@ export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
         >
           <StatusList items={summary.weekTasks.map((task) => task.title)} emptyText="本周还没有任务" />
         </WorkCard>
-        <WorkCard title="最近灵感" subtitle={`${summary.notes.length} 条记录`} accent="#b98063" icon={Lightbulb} onClick={() => onNavigate("notes")}>
+        <WorkCard title="最近灵感" subtitle={`${summary.notes.length} 条记录`} accent="var(--color-coral)" icon={Lightbulb} onClick={() => onNavigate("notes")}>
           <StatusList items={summary.notes.map((note) => note.content)} emptyText="还没有灵感记录" />
         </WorkCard>
         <WorkCard
           title="专注时长"
           subtitle={`今日 ${formatDuration(summary.todayFocusSeconds)}`}
-          accent="#6f7fa8"
+          accent="var(--color-sky)"
           icon={Clock3}
           onClick={() => onNavigate("focus")}
         >

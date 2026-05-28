@@ -14,10 +14,10 @@ export function FocusView({ focus }: FocusViewProps) {
 
   return (
     <PanelBody>
-      <div className="min-w-0 rounded-md bg-[var(--accent)] p-2.5 text-[var(--accent-contrast)]">
-        <p className="text-xs">{session ? (session.status === "paused" ? "已暂停" : "当前专注") : "尚未开始"}</p>
-        <strong className="mt-0.5 block text-2xl leading-tight tabular-nums">{elapsedText}</strong>
-        <p className="mt-0.5 truncate text-xs">{session?.title ?? "给正在做的事起个名字"}</p>
+      <div className="focus-panel min-w-0">
+        <p>{session ? (session.status === "paused" ? "已暂停" : "当前专注") : "尚未开始"}</p>
+        <strong>{elapsedText}</strong>
+        <span>{session?.title ?? "给正在做的事起个名字"}</span>
       </div>
       {error && <p className="rounded-md bg-red-50 p-2 text-xs text-red-700">{error}</p>}
       {!session && (
@@ -32,34 +32,30 @@ export function FocusView({ focus }: FocusViewProps) {
           <input
             value={title}
             onChange={(event) => setTitle(event.currentTarget.value)}
-            className="h-8 min-w-0 rounded-md border border-[var(--app-border)] bg-white/45 px-2 text-sm outline-none placeholder:text-[var(--text-muted)] focus:ring-2 focus:ring-[var(--accent)]"
-            placeholder="现在要专注什么"
+            className="task-input-field h-8 min-w-0 px-2 text-sm outline-none placeholder:text-[var(--text-muted)]"
+            placeholder="现在要专注什么？"
           />
-          <button
-            type="submit"
-            className="h-8 rounded-md bg-[var(--accent)] text-sm text-[var(--accent-contrast)] disabled:opacity-60"
-            disabled={loading}
-          >
+          <button type="submit" className="primary-action h-8 rounded-md text-sm disabled:opacity-60" disabled={loading}>
             开始专注
           </button>
         </form>
       )}
       {session?.status === "running" && (
         <div className="grid grid-cols-2 gap-1.5">
-          <button className="h-8 rounded-md border border-[var(--app-border)] bg-white/35 text-sm" onClick={() => void pause()}>
+          <button className="secondary-action h-8 rounded-md text-sm" onClick={() => void pause()}>
             暂停
           </button>
-          <button className="h-8 rounded-md bg-[var(--accent)] text-sm text-[var(--accent-contrast)]" onClick={() => void complete()}>
+          <button className="primary-action h-8 rounded-md text-sm" onClick={() => void complete()}>
             结束
           </button>
         </div>
       )}
       {session?.status === "paused" && (
         <div className="grid grid-cols-2 gap-1.5">
-          <button className="h-8 rounded-md border border-[var(--app-border)] bg-white/35 text-sm" onClick={() => void resume()}>
+          <button className="secondary-action h-8 rounded-md text-sm" onClick={() => void resume()}>
             继续
           </button>
-          <button className="h-8 rounded-md bg-[var(--accent)] text-sm text-[var(--accent-contrast)]" onClick={() => void complete()}>
+          <button className="primary-action h-8 rounded-md text-sm" onClick={() => void complete()}>
             结束
           </button>
         </div>

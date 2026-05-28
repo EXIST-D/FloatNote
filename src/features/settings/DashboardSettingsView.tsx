@@ -9,10 +9,10 @@ import type { useSettings } from "./useSettings";
 
 type SettingsController = ReturnType<typeof useSettings>;
 
-const mainStyles: Array<{ id: MainWindowStyle; label: string }> = [
-  { id: "desk", label: "书桌仪表盘" },
-  { id: "minimal", label: "极简追踪" },
-  { id: "green", label: "墨绿工作台" },
+const mainStyles: Array<{ id: MainWindowStyle; label: string; note: string }> = [
+  { id: "desk", label: "月光纸笺", note: "柔和纸面" },
+  { id: "minimal", label: "清简", note: "低噪整理" },
+  { id: "green", label: "墨绿", note: "沉静工作台" },
 ];
 
 const fontStyles: Array<{ id: FontStyleName; label: string }> = [
@@ -82,25 +82,27 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
   }
 
   return (
-    <main className="dashboard-page">
+    <main className="dashboard-page settings-page">
       <div className="dashboard-page-title">
-        <p>把浮笺调成顺手的样子</p>
-        <h1>设置</h1>
+        <p>外观实验室</p>
+        <h1>把浮笺调成顺手的样子</h1>
       </div>
       <section className="settings-grid">
-        <article className="settings-card">
+        <article className="settings-card settings-card-wide">
           <h2>
             <Palette size={18} /> 主窗口形态
           </h2>
-          <div className="settings-options">
+          <div className="settings-options settings-swatch-row">
             {mainStyles.map((item) => (
               <button
                 key={item.id}
                 type="button"
-                className={`setting-chip ${settings.mainWindowStyle === item.id ? "is-active" : ""}`}
+                className={`setting-chip setting-swatch ${settings.mainWindowStyle === item.id ? "is-active" : ""}`}
                 onClick={() => void settings.setMainWindowStyle(item.id)}
               >
-                {item.label}
+                <span className={`swatch-preview swatch-preview-${item.id}`} />
+                <strong>{item.label}</strong>
+                <small>{item.note}</small>
               </button>
             ))}
           </div>
@@ -117,6 +119,42 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
                 type="button"
                 className={`setting-chip ${settings.reviewMode === item.id ? "is-active" : ""}`}
                 onClick={() => void settings.setReviewMode(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </article>
+
+        <article className="settings-card">
+          <h2>
+            <Type size={18} /> 字感
+          </h2>
+          <div className="settings-options">
+            {fontStyles.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`setting-chip ${settings.fontStyle === item.id ? "is-active" : ""}`}
+                onClick={() => void settings.setFontStyle(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </article>
+
+        <article className="settings-card">
+          <h2>
+            <Droplets size={18} /> 纸面透明度
+          </h2>
+          <div className="settings-options">
+            {opacityStyles.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`setting-chip ${settings.paperOpacity === item.id ? "is-active" : ""}`}
+                onClick={() => void settings.setPaperOpacity(item.id)}
               >
                 {item.label}
               </button>
@@ -158,42 +196,6 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
             >
               恢复默认文案
             </button>
-          </div>
-        </article>
-
-        <article className="settings-card">
-          <h2>
-            <Type size={18} /> 字感
-          </h2>
-          <div className="settings-options">
-            {fontStyles.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`setting-chip ${settings.fontStyle === item.id ? "is-active" : ""}`}
-                onClick={() => void settings.setFontStyle(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </article>
-
-        <article className="settings-card">
-          <h2>
-            <Droplets size={18} /> 浮窗透明度
-          </h2>
-          <div className="settings-options">
-            {opacityStyles.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`setting-chip ${settings.paperOpacity === item.id ? "is-active" : ""}`}
-                onClick={() => void settings.setPaperOpacity(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
           </div>
         </article>
 

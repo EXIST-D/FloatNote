@@ -59,6 +59,34 @@ export function DashboardShell() {
     void setSetting("dashboard_active_tab", tab);
   }
 
+  useEffect(() => {
+    function focusLater(selector: string) {
+      window.setTimeout(() => {
+        const target = document.querySelector<HTMLElement>(selector);
+        target?.focus();
+      }, 80);
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (!(event.ctrlKey || event.metaKey)) return;
+      if (event.key.toLowerCase() === "n" && event.shiftKey) {
+        event.preventDefault();
+        changeTab("notes");
+        focusLater("[data-quick-note-input]");
+      } else if (event.key.toLowerCase() === "n") {
+        event.preventDefault();
+        changeTab("today");
+        focusLater("[data-quick-task-input]");
+      } else if (event.key.toLowerCase() === "f") {
+        event.preventDefault();
+        changeTab("history");
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   return (
     <main className="dashboard-shell" data-main-window-style={settings.mainWindowStyle}>
       <DashboardNav activeTab={activeTab} onChange={changeTab} />

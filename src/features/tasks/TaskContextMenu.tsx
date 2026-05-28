@@ -16,8 +16,8 @@ interface TaskContextMenuProps {
 }
 
 export function TaskContextMenu({ task, x, y, labels, onClose, onToggleStatus, onEdit, onDelete, onCopy, onLabelChange }: TaskContextMenuProps) {
-  const left = Math.max(12, Math.min(x, Math.max(12, window.innerWidth - 220)));
-  const top = Math.max(12, Math.min(y, Math.max(12, window.innerHeight - 260)));
+  const left = Math.max(12, Math.min(x, Math.max(12, window.innerWidth - 228)));
+  const top = Math.max(12, Math.min(y, Math.max(12, window.innerHeight - 276)));
 
   const items = [
     {
@@ -33,11 +33,11 @@ export function TaskContextMenu({ task, x, y, labels, onClose, onToggleStatus, o
   return (
     <div className="fixed inset-0 z-40" onClick={onClose} onContextMenu={(event) => event.preventDefault()}>
       <div
-        className="grid w-52 gap-1 rounded-md border border-[var(--menu-border)] bg-[var(--menu-bg)] p-1 text-xs shadow-[var(--surface-shadow)]"
+        className="task-context-menu popover grid gap-1 p-1 text-xs"
         style={{ left, top, position: "fixed" }}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="border-b border-[var(--menu-border)] p-1.5">
+        <div className="task-menu-section">
           <p className="mb-1 text-[var(--text-muted)]">等级标签</p>
           <TaskLabelPicker
             labels={labels}
@@ -54,9 +54,7 @@ export function TaskContextMenu({ task, x, y, labels, onClose, onToggleStatus, o
             <button
               key={item.label}
               type="button"
-              className={`flex h-8 items-center gap-2 rounded px-2 text-left transition hover:bg-black/5 ${
-                item.danger ? "text-[var(--danger)]" : "text-[var(--text-main)]"
-              }`}
+              className={`task-menu-item ${item.danger ? "is-danger" : ""}`}
               onClick={() => {
                 item.action();
                 onClose();
