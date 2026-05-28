@@ -1,4 +1,3 @@
-import type { EditorView } from "@codemirror/view";
 import { ArrowRight, FileText, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
@@ -7,12 +6,9 @@ import { Toast } from "../../components/common/Toast";
 import { PanelBody } from "../../components/layout/PanelBody";
 import type { Note, TaskScope } from "../../types/domain";
 import { useNotes } from "../notes/useNotes";
-import { MarkdownCodeMirror, type MarkdownCodeMirrorHandle } from "./codemirror/MarkdownCodeMirror";
-import { MarkdownOutlinePanel } from "./codemirror/MarkdownOutlinePanel";
-import { MarkdownToolbar } from "./codemirror/MarkdownToolbar";
-import { countMarkdownWords, extractMarkdownOutline } from "./codemirror/markdownOutline";
 import { MarkdownStudioHeader } from "./MarkdownStudioHeader";
 import { useMarkdownAutosave, type MarkdownSaveStatus } from "./useMarkdownAutosave";
+import { VditorMarkdownEditor, type VditorMarkdownEditorHandle } from "./vditor/VditorMarkdownEditor";
 
 function getNoteTitle(content: string) {
   const firstLine = content
@@ -56,21 +52,14 @@ function getSaveStatusLabel(status: MarkdownSaveStatus, isNewDraft: boolean, err
 
 export function MarkdownStudio() {
   const { notes, loading, error, addNote, editNote, convertNote, removeNote } = useNotes();
-  const editorRef = useRef<MarkdownCodeMirrorHandle | null>(null);
-  const [editorView, setEditorView] = useState<EditorView | null>(null);
+  const editorRef = useRef<VditorMarkdownEditorHandle | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
-  const [outlineOpen, setOutlineOpen] = useState(false);
-  const [outlinePinned, setOutlinePinned] = useState(false);
-  const [collapsedOutlineGroups, setCollapsedOutlineGroups] = useState<Set<string>>(() => new Set());
 
   const selectedNote = useMemo(() => notes.find((note) => note.id === selectedId) ?? null, [notes, selectedId]);
   const isNewDraft = selectedId === null;
-  const outline = useMemo(() => extractMarkdownOutline(draft), [draft]);
-  const wordCount = useMemo(() => countMarkdownWords(draft), [draft]);
-  const lineCount = useMemo(() => Math.max(1, draft.split(/\r?\n/).length), [draft]);
 
   const autosave = useMarkdownAutosave({
     noteId: selectedId,
@@ -148,15 +137,6 @@ export function MarkdownStudio() {
     setFeedback("灵感已移入回收站");
   }
 
-  function toggleOutlineGroup(id: string) {
-    setCollapsedOutlineGroups((current) => {
-      const next = new Set(current);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
   const title = isNewDraft ? "新灵感草稿" : getNoteTitle(draft || selectedNote?.content || "");
   const saveStatus = getSaveStatusLabel(autosave.status, isNewDraft, autosave.error);
 
@@ -172,7 +152,7 @@ export function MarkdownStudio() {
         onSaveNew={() => void saveNewNote()}
       />
       {error && <p className="rounded-md bg-red-50 p-2 text-xs text-red-700">{error}</p>}
-      <div className={`markdown-studio-layout ${outlineOpen ? "is-outline-open" : ""} ${outlinePinned ? "is-outline-pinned" : ""}`}>
+      <div className="markdown-studio-layout markdown-studio-layout-vditor">
         <aside className="markdown-studio-sidebar">
           <button type="button" className={`markdown-note-item ${isNewDraft ? "is-active" : ""}`} onClick={() => void startNewNote()}>
             <FileText size={15} />
@@ -229,31 +209,16 @@ export function MarkdownStudio() {
               </IconButton>
             )}
           </div>
-          <div className="markdown-editor-frame">
-            <MarkdownToolbar view={editorView} outlineOpen={outlineOpen} onToggleOutline={() => setOutlineOpen((open) => !open)} />
-            <MarkdownCodeMirror
+          <div className="markdown-editor-frame markdown-editor-frame-vditor">
+            <VditorMarkdownEditor
               ref={editorRef}
               value={draft}
               autoFocus
               onChange={setDraft}
-              onViewReady={setEditorView}
               onSaveShortcut={() => (isNewDraft ? void saveNewNote() : void autosave.saveNow(draft))}
             />
           </div>
         </section>
-        {outlineOpen && (
-          <MarkdownOutlinePanel
-            items={outline}
-            wordCount={wordCount}
-            lineCount={lineCount}
-            pinned={outlinePinned}
-            collapsedGroups={collapsedOutlineGroups}
-            onJump={(line) => editorRef.current?.scrollToLine(line)}
-            onClose={() => setOutlineOpen(false)}
-            onTogglePinned={() => setOutlinePinned((pinned) => !pinned)}
-            onToggleGroup={toggleOutlineGroup}
-          />
-        )}
       </div>
       <Toast message={feedback} />
     </PanelBody>
