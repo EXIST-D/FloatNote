@@ -3,6 +3,7 @@
 import { createRoot, type Root } from "react-dom/client";
 import { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import Vditor from "vditor";
 import { VditorMarkdownEditor } from "./VditorMarkdownEditor";
 
 const destroyMock = vi.fn();
@@ -65,6 +66,27 @@ describe("VditorMarkdownEditor", () => {
     expect(setValueMock).toHaveBeenCalledWith("# 初始内容", true);
     expect(disabledCacheMock).toHaveBeenCalled();
     expect(document.getElementById("vditorIconScript")).not.toBeNull();
+  });
+
+  it("uses instant-render mode with pinned downward Chinese toolbar tips", async () => {
+    await act(async () => {
+      root.render(<VditorMarkdownEditor value="" onChange={() => {}} />);
+      await Promise.resolve();
+    });
+
+    expect(vi.mocked(Vditor)).toHaveBeenCalledWith(
+      expect.any(HTMLDivElement),
+      expect.objectContaining({
+        mode: "ir",
+        toolbarConfig: {
+          pin: true,
+        },
+        toolbar: expect.arrayContaining([
+          expect.objectContaining({ name: "italic", tip: "斜体", tipPosition: "s" }),
+          expect.objectContaining({ name: "headings", tip: "标题", tipPosition: "s" }),
+        ]),
+      }),
+    );
   });
 
   it("emits markdown changes through onChange", async () => {

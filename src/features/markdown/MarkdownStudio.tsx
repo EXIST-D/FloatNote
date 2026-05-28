@@ -1,4 +1,4 @@
-import { ArrowRight, FileText, Trash2 } from "lucide-react";
+import { ArrowRight, FileText, ListTree, PanelRightClose, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
@@ -9,6 +9,13 @@ import { useNotes } from "../notes/useNotes";
 import { MarkdownStudioHeader } from "./MarkdownStudioHeader";
 import { useMarkdownAutosave, type MarkdownSaveStatus } from "./useMarkdownAutosave";
 import { VditorMarkdownEditor, type VditorMarkdownEditorHandle } from "./vditor/VditorMarkdownEditor";
+
+export interface MarkdownOutlineItem {
+  id: string;
+  index: number;
+  level: number;
+  title: string;
+}
 
 function getNoteTitle(content: string) {
   const firstLine = content
@@ -30,6 +37,31 @@ function getNoteExcerpt(content: string) {
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 84);
+}
+
+function cleanHeadingText(value: string) {
+  return value
+    .replace(/[*_`~[\]()]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function extractMarkdownOutline(content: string): MarkdownOutlineItem[] {
+  const items: MarkdownOutlineItem[] = [];
+
+  content.split(/\r?\n/).forEach((line, lineIndex) => {
+    const match = /^(#{1,6})\s+(.+)$/.exec(line.trim());
+    if (!match) return;
+
+    items.push({
+      id: `${lineIndex}-${items.length}`,
+      index: items.length,
+      level: match[1].length,
+      title: cleanHeadingText(match[2]) || "未命名标题",
+    });
+  });
+
+  return items;
 }
 
 function formatNoteDate(value: string) {
@@ -60,6 +92,7 @@ export function MarkdownStudio() {
 
   const selectedNote = useMemo(() => notes.find((note) => note.id === selectedId) ?? null, [notes, selectedId]);
   const isNewDraft = selectedId === null;
+  const outline = useMemo(() => extractMarkdownOutline(draft), [draft]);
 
   const autosave = useMarkdownAutosave({
     noteId: selectedId,
@@ -152,7 +185,7 @@ export function MarkdownStudio() {
         onSaveNew={() => void saveNewNote()}
       />
       {error && <p className="rounded-md bg-red-50 p-2 text-xs text-red-700">{error}</p>}
-      <div className="markdown-studio-layout markdown-studio-layout-vditor">
+      <div className="markdown-studio-layout markdown-studio-layout-vditor is-outline-open">
         <aside className="markdown-studio-sidebar">
           <button type="button" className={`markdown-note-item ${isNewDraft ? "is-active" : ""}`} onClick={() => void startNewNote()}>
             <FileText size={15} />
@@ -203,20 +236,52 @@ export function MarkdownStudio() {
               <ArrowRight size={12} />
               本周任务
             </button>
+            <button type="button" className="note-action is-active" aria-pressed="true" onClick={() => editorRef.current?.focus()}>
+              <PanelRightClose size={12} />
+              大纲
+            </button>
             {!isNewDraft && (
               <IconButton label="删除灵感" onClick={() => void deleteSelectedNote()}>
                 <Trash2 size={14} />
               </IconButton>
             )}
           </div>
-          <div className="markdown-editor-frame markdown-editor-frame-vditor">
-            <VditorMarkdownEditor
-              ref={editorRef}
-              value={draft}
-              autoFocus
-              onChange={setDraft}
-              onSaveShortcut={() => (isNewDraft ? void saveNewNote() : void autosave.saveNow(draft))}
-            />
+          <div className="markdown-editor-workspace is-outline-open">
+            <div className="markdown-editor-frame markdown-editor-frame-vditor">
+              <VditorMarkdownEditor
+                ref={editorRef}
+                value={draft}
+                autoFocus
+                onChange={setDraft}
+                onSaveShortcut={() => (isNewDraft ? void saveNewNote() : void autosave.saveNow(draft))}
+              />
+            </div>
+            <aside className="markdown-outline-panel-vditor" aria-label="Markdown 大纲">
+              <header>
+                <span>
+                  <ListTree size={15} />
+                  文稿大纲
+                </span>
+                <small>{outline.length > 0 ? `${outline.length} 个标题` : "暂无标题"}</small>
+              </header>
+              {outline.length === 0 ? (
+                <p className="markdown-outline-empty-vditor">使用 #、##、### 写标题后，这里会自动生成层级。</p>
+              ) : (
+                <div className="markdown-outline-list-vditor">
+                  {outline.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className={`markdown-outline-item-vditor level-${Math.min(item.level, 4)}`}
+                      onClick={() => editorRef.current?.scrollToHeading(item.index)}
+                    >
+                      <em>H{item.level}</em>
+                      <span>{item.title}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </aside>
           </div>
         </section>
       </div>
