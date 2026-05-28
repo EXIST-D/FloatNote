@@ -4,6 +4,25 @@ use tauri::{
     AppHandle, Emitter, Manager,
 };
 
+#[tauri::command]
+fn save_export_file(file_name: String, contents: String) -> Result<String, String> {
+    let safe_name: String = file_name
+        .chars()
+        .map(|ch| match ch {
+            '<' | '>' | ':' | '"' | '/' | '\\' | '|' | '?' | '*' => '_',
+            _ => ch,
+        })
+        .collect();
+    let base_dir = std::env::var("USERPROFILE")
+        .map(std::path::PathBuf::from)
+        .map(|path| path.join("Downloads"))
+        .unwrap_or_else(|_| std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from(".")));
+    std::fs::create_dir_all(&base_dir).map_err(|err| err.to_string())?;
+    let path = base_dir.join(safe_name);
+    std::fs::write(&path, contents).map_err(|err| err.to_string())?;
+    Ok(path.to_string_lossy().to_string())
+}
+
 fn show_dashboard(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("dashboard") {
         let _ = window.show();
@@ -22,6 +41,7 @@ fn show_floating_window(app: &AppHandle) {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![save_export_file])
         .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
             show_dashboard(app);
         }))

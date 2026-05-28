@@ -1,16 +1,16 @@
 import { Eye, Pencil } from "lucide-react";
-import { useMemo, useState } from "react";
-import { renderMarkdownToHtml } from "./markdownRender";
+import { useState } from "react";
+import { MarkdownPreview } from "./MarkdownPreview";
 
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  onSubmit?: () => void;
 }
 
-export function MarkdownEditor({ value, onChange, placeholder }: MarkdownEditorProps) {
+export function MarkdownEditor({ value, onChange, placeholder, onSubmit }: MarkdownEditorProps) {
   const [mode, setMode] = useState<"edit" | "preview">("edit");
-  const previewHtml = useMemo(() => renderMarkdownToHtml(value), [value]);
 
   return (
     <section className="markdown-editor">
@@ -29,11 +29,17 @@ export function MarkdownEditor({ value, onChange, placeholder }: MarkdownEditorP
           data-quick-note-input
           value={value}
           onChange={(event) => onChange(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+              event.preventDefault();
+              onSubmit?.();
+            }
+          }}
           className="note-editor markdown-editor-input min-h-24 resize-none p-2 text-sm leading-6 outline-none placeholder:text-[var(--text-muted)]"
           placeholder={placeholder}
         />
       ) : (
-        <div className="markdown-preview" dangerouslySetInnerHTML={{ __html: previewHtml || "<p>暂无内容</p>" }} />
+        <MarkdownPreview content={value} />
       )}
     </section>
   );

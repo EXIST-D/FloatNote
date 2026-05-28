@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { searchAll } from "../../data/searchRepository";
 import type { DashboardTab, SearchResult } from "../../types/domain";
 
@@ -7,17 +7,43 @@ interface SearchViewProps {
   onNavigate: (tab: DashboardTab) => void;
 }
 
-const typeLabels: Record<SearchResult["type"], string> = {
-  task: "任务",
-  note: "灵感",
-  review: "历史",
-  focus: "专注",
+type SearchGroupKey = "today" | "week" | "note" | "review" | "focus";
+
+const groupMeta: Record<SearchGroupKey, { label: string; emptyLabel: string }> = {
+  today: { label: "今日任务", emptyLabel: "今日" },
+  week: { label: "本周任务", emptyLabel: "本周" },
+  note: { label: "灵感记录", emptyLabel: "灵感" },
+  review: { label: "历史复盘", emptyLabel: "历史" },
+  focus: { label: "专注摘要", emptyLabel: "专注" },
 };
+
+const groupOrder: SearchGroupKey[] = ["today", "week", "note", "review", "focus"];
+
+function getGroupKey(result: SearchResult): SearchGroupKey {
+  if (result.type === "task") return result.targetTab === "week" ? "week" : "today";
+  return result.type;
+}
 
 export function SearchView({ onNavigate }: SearchViewProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const groupedResults = useMemo(() => {
+    const groups: Record<SearchGroupKey, SearchResult[]> = {
+      today: [],
+      week: [],
+      note: [],
+      review: [],
+      focus: [],
+    };
+    for (const result of results) {
+      groups[getGroupKey(result)].push(result);
+    }
+    return groupOrder
+      .map((key) => ({ key, label: groupMeta[key].label, results: groups[key] }))
+      .filter((group) => group.results.length > 0);
+  }, [results]);
 
   async function runSearch(nextQuery = query) {
     setQuery(nextQuery);
@@ -51,13 +77,24 @@ export function SearchView({ onNavigate }: SearchViewProps) {
       <section className="search-results">
         {loading && <p className="dashboard-empty">正在搜索...</p>}
         {!loading && query.trim() && results.length === 0 && <p className="dashboard-empty">没有找到相关记录</p>}
-        {results.map((result) => (
-          <button key={`${result.type}-${result.id}`} type="button" className="search-result" onClick={() => onNavigate(result.targetTab)}>
-            <span>{typeLabels[result.type]}</span>
-            <strong>{result.title}</strong>
-            <small>{result.snippet}</small>
-          </button>
-        ))}
+        {!loading &&
+          groupedResults.map((group) => (
+            <section key={group.key} className="search-result-group" aria-label={group.label}>
+              <header>
+                <strong>{group.label}</strong>
+                <span>{group.results.length} 条</span>
+              </header>
+              <div className="search-result-group-list">
+                {group.results.map((result) => (
+                  <button key={`${result.type}-${result.id}`} type="button" className="search-result" onClick={() => onNavigate(result.targetTab)}>
+                    <span>{groupMeta[getGroupKey(result)].emptyLabel}</span>
+                    <strong>{result.title}</strong>
+                    <small>{result.snippet}</small>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ))}
       </section>
     </main>
   );

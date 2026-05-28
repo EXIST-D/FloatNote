@@ -1,4 +1,4 @@
-import { ArrowRight, Clock3, Lightbulb, ListTodo, NotebookTabs } from "lucide-react";
+import { ArrowRight, Clock3, Image, Lightbulb, ListTodo, NotebookTabs } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import { formatDuration } from "../../lib/time";
 import type { DashboardTab } from "../../types/domain";
@@ -95,6 +95,12 @@ export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
         <div>
           <p>{heroCopy.kicker}</p>
           <h1>{heroCopy.title}</h1>
+          <div className="dashboard-hero-actions">
+            <button type="button" onClick={() => onNavigate("settings")}>
+              <Image size={15} />
+              调整背景
+            </button>
+          </div>
         </div>
         <div className="dashboard-hero-metric">
           <span>今日专注</span>

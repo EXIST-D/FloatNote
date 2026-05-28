@@ -10,16 +10,20 @@ import {
 import { restrictToVerticalAxis, restrictToWindowEdges } from "@dnd-kit/modifiers";
 import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { emit } from "@tauri-apps/api/event";
 import { Check, GripVertical, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
+import { Toast } from "../../components/common/Toast";
 import { createReminder } from "../../data/remindersRepository";
 import type { Task, TaskStatus } from "../../types/domain";
 import { buildReorderedTasks } from "./taskOrdering";
-import { TaskLabelColorBar } from "./TaskLabelColorBar";
 import { TaskContextMenu } from "./TaskContextMenu";
+import { TaskLabelColorBar } from "./TaskLabelColorBar";
 import { useTaskLabels } from "./useTaskLabels";
+
+type ReminderPreset = "30m" | "1h" | "tonight" | "tomorrow";
 
 interface SortableTaskListProps {
   tasks: Task[];
@@ -91,9 +95,7 @@ function SortableTaskRow({
       </button>
       <button
         type="button"
-        className={`task-checkbox mt-0.5 grid h-5 w-5 place-items-center ${
-          task.status === "done" ? "is-done" : ""
-        }`}
+        className={`task-checkbox mt-0.5 grid h-5 w-5 place-items-center ${task.status === "done" ? "is-done" : ""}`}
         onClick={() => onStatusChange(task)}
         aria-label={task.status === "done" ? "取消完成" : "完成"}
         title={task.status === "done" ? "取消完成" : "完成"}
@@ -139,6 +141,7 @@ export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChan
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [menuState, setMenuState] = useState<{ task: Task; x: number; y: number } | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
   const taskLabels = useTaskLabels();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -154,6 +157,12 @@ export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChan
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  useEffect(() => {
+    if (!feedback) return;
+    const timeoutId = window.setTimeout(() => setFeedback(null), 1800);
+    return () => window.clearTimeout(timeoutId);
+  }, [feedback]);
 
   if (tasks.length === 0) {
     return <EmptyState title={emptyText} />;
@@ -187,12 +196,13 @@ export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChan
   async function copyTask(task: Task) {
     try {
       await navigator.clipboard.writeText(task.title);
+      setFeedback("任务文本已复制");
     } catch {
-      // Clipboard access may be unavailable in some WebView contexts; keep the UI stable.
+      setFeedback("当前环境无法访问剪贴板");
     }
   }
 
-  function resolveReminderTime(preset: "30m" | "1h" | "tonight" | "tomorrow" | "custom") {
+  function resolveReminderTime(preset: ReminderPreset) {
     const date = new Date();
     if (preset === "30m") date.setMinutes(date.getMinutes() + 30);
     if (preset === "1h") date.setHours(date.getHours() + 1);
@@ -201,72 +211,70 @@ export function SortableTaskList({ tasks, emptyText, onStatusChange, onTitleChan
       date.setDate(date.getDate() + 1);
       date.setHours(9, 0, 0, 0);
     }
-    if (preset === "custom") {
-      const input = window.prompt("请输入提醒时间，例如 2026-05-28 20:30");
-      if (!input) return null;
-      const parsed = new Date(input.replace(" ", "T"));
-      if (Number.isNaN(parsed.getTime())) {
-        window.alert("时间格式无法识别");
-        return null;
-      }
-      return parsed.toISOString();
-    }
     if (date.getTime() <= Date.now()) date.setDate(date.getDate() + 1);
     return date.toISOString();
   }
 
-  async function addReminder(task: Task, preset: "30m" | "1h" | "tonight" | "tomorrow" | "custom") {
-    const remindAt = resolveReminderTime(preset);
-    if (!remindAt) return;
+  async function addReminderAt(task: Task, remindAt: string) {
     await createReminder(task, remindAt);
+    await emit("reminders:changed");
+    setFeedback(`已为“${task.title}”添加提醒`);
+  }
+
+  async function addReminder(task: Task, preset: ReminderPreset) {
+    await addReminderAt(task, resolveReminderTime(preset));
   }
 
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCenter}
-      modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
-      onDragEnd={(event) => void handleDragEnd(event)}
-    >
-      <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
-        <div className="grid min-h-0 gap-1.5 overflow-auto pr-1">
-          {tasks.map((task) => (
-            <SortableTaskRow
-              key={task.id}
-              task={task}
-              expanded={expandedId === task.id}
-              editing={editingId === task.id}
-              editValue={editValue}
-              onExpandToggle={(id) => setExpandedId((current) => (current === id ? null : id))}
-              onEditStart={startEdit}
-              onEditValueChange={setEditValue}
-              onEditCancel={() => {
-                setEditingId(null);
-                setEditValue("");
-              }}
-              onEditCommit={() => void commitEdit()}
-              onContextMenu={(nextTask, x, y) => setMenuState({ task: nextTask, x, y })}
-              onStatusChange={(nextTask) => void onStatusChange(nextTask.id, nextTask.status === "done" ? "active" : "done")}
-              onDelete={(id) => void onDelete(id)}
-            />
-          ))}
-        </div>
-      </SortableContext>
-      {menuState && (
-        <TaskContextMenu
-          task={menuState.task}
-          labels={taskLabels.labels}
-          x={menuState.x}
-          y={menuState.y}
-          onClose={() => setMenuState(null)}
-          onToggleStatus={(task) => void onStatusChange(task.id, task.status === "done" ? "active" : "done")}
-          onEdit={startEdit}
-          onDelete={(task) => void onDelete(task.id)}
-          onCopy={(task) => void copyTask(task)}
-          onLabelChange={(task, labelId) => void onLabelChange(task.id, labelId)}
-          onReminder={(task, preset) => void addReminder(task, preset)}
-        />
-      )}
-    </DndContext>
+    <>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+        onDragEnd={(event) => void handleDragEnd(event)}
+      >
+        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+          <div className="grid min-h-0 gap-1.5 overflow-auto pr-1">
+            {tasks.map((task) => (
+              <SortableTaskRow
+                key={task.id}
+                task={task}
+                expanded={expandedId === task.id}
+                editing={editingId === task.id}
+                editValue={editValue}
+                onExpandToggle={(id) => setExpandedId((current) => (current === id ? null : id))}
+                onEditStart={startEdit}
+                onEditValueChange={setEditValue}
+                onEditCancel={() => {
+                  setEditingId(null);
+                  setEditValue("");
+                }}
+                onEditCommit={() => void commitEdit()}
+                onContextMenu={(nextTask, x, y) => setMenuState({ task: nextTask, x, y })}
+                onStatusChange={(nextTask) => void onStatusChange(nextTask.id, nextTask.status === "done" ? "active" : "done")}
+                onDelete={(id) => void onDelete(id)}
+              />
+            ))}
+          </div>
+        </SortableContext>
+        {menuState && (
+          <TaskContextMenu
+            task={menuState.task}
+            labels={taskLabels.labels}
+            x={menuState.x}
+            y={menuState.y}
+            onClose={() => setMenuState(null)}
+            onToggleStatus={(task) => void onStatusChange(task.id, task.status === "done" ? "active" : "done")}
+            onEdit={startEdit}
+            onDelete={(task) => void onDelete(task.id)}
+            onCopy={(task) => void copyTask(task)}
+            onLabelChange={(task, labelId) => void onLabelChange(task.id, labelId)}
+            onReminder={(task, preset) => void addReminder(task, preset)}
+            onCustomReminder={(task, remindAt) => void addReminderAt(task, remindAt)}
+          />
+        )}
+      </DndContext>
+      <Toast message={feedback} />
+    </>
   );
 }

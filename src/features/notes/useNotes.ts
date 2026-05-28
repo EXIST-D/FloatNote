@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { createNote, deleteNote, listRecentNotes } from "../../data/notesRepository";
+import { createNote, deleteNote, listRecentNotes, updateNote } from "../../data/notesRepository";
 import { createTaskFromNote } from "../../data/tasksRepository";
 import type { Note, TaskScope } from "../../types/domain";
 
@@ -29,6 +29,11 @@ export function useNotes() {
     await reload();
   }
 
+  async function editNote(id: string, content: string) {
+    await updateNote(id, content);
+    await reload();
+  }
+
   async function convertNote(note: Note, scope: TaskScope) {
     await createTaskFromNote(scope, note.content);
   }
@@ -38,5 +43,5 @@ export function useNotes() {
     await reload();
   }
 
-  return { notes, loading, error, addNote, convertNote, removeNote, reload };
+  return { notes, loading, error, addNote, editNote, convertNote, removeNote, reload };
 }

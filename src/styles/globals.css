@@ -1951,6 +1951,13 @@ textarea:focus,
   padding: 8px;
 }
 
+.markdown-preview-card {
+  max-height: 148px;
+  min-height: 0;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 13px;
+}
+
 .task-reminder-presets {
   display: flex;
   flex-wrap: wrap;
@@ -1986,6 +1993,178 @@ textarea:focus,
   .reminder-card,
   .trash-card,
   .settings-range-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dashboard-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.dashboard-hero-actions button {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.34);
+  color: var(--text-main);
+  padding: 0 11px;
+}
+
+.background-settings-card {
+  overflow: hidden;
+}
+
+.dashboard-background-config {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(260px, 1.15fr);
+  gap: 14px;
+}
+
+.dashboard-background-preview {
+  position: relative;
+  display: grid;
+  min-height: 178px;
+  overflow: hidden;
+  align-items: end;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.46), rgba(255, 255, 255, 0.12)),
+    var(--surface-paper);
+  padding: 16px;
+  isolation: isolate;
+}
+
+.dashboard-background-preview::before {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--dashboard-bg-image);
+  background-position: center;
+  background-repeat: var(--dashboard-bg-repeat, no-repeat);
+  background-size: var(--dashboard-bg-size, cover);
+  content: "";
+  filter: blur(var(--dashboard-bg-blur, 0));
+  opacity: var(--dashboard-bg-opacity, 0.36);
+  transform: scale(1.02);
+}
+
+.dashboard-background-preview-layer {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(255, 250, 240, var(--dashboard-bg-dim, 0.08));
+}
+
+.dashboard-background-preview strong,
+.dashboard-background-preview small {
+  display: block;
+}
+
+.dashboard-background-preview strong {
+  font-family: var(--font-title);
+  font-size: 20px;
+}
+
+.dashboard-background-preview small {
+  color: var(--text-muted);
+}
+
+.dashboard-background-controls {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+}
+
+.background-fit-options {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+}
+
+.dashboard-work-card,
+.dashboard-history-strip,
+.history-day,
+.settings-card,
+.note-card {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08)),
+    rgba(255, 250, 240, calc(var(--paper-alpha) * 0.74));
+}
+
+.dashboard-work-card:hover,
+.dashboard-history-strip:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.54), rgba(255, 255, 255, 0.16)),
+    rgba(255, 250, 240, calc(var(--paper-alpha) * 0.86));
+}
+
+.search-result-group {
+  display: grid;
+  gap: 8px;
+}
+
+.search-result-group header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.search-result-group header strong {
+  color: var(--text-main);
+  font-family: var(--font-title);
+  font-size: 16px;
+}
+
+.search-result-group-list {
+  display: grid;
+  gap: 8px;
+}
+
+.task-reminder-custom {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.3);
+  padding: 8px;
+}
+
+.task-reminder-custom input {
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.58);
+  padding: 5px 6px;
+  color: var(--text-main);
+}
+
+.task-reminder-custom small {
+  color: var(--danger);
+}
+
+.task-reminder-custom div {
+  display: flex;
+  gap: 6px;
+}
+
+.task-reminder-custom button {
+  min-height: 26px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 0 8px;
+}
+
+@media (max-width: 920px) {
+  .dashboard-background-config {
     grid-template-columns: 1fr;
   }
 }

@@ -1,4 +1,4 @@
-import { ArrowRight, Trash2 } from "lucide-react";
+import { ArrowRight, Check, Pencil, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
@@ -6,11 +6,14 @@ import { Toast } from "../../components/common/Toast";
 import { PanelBody } from "../../components/layout/PanelBody";
 import type { Note, TaskScope } from "../../types/domain";
 import { MarkdownEditor } from "../markdown/MarkdownEditor";
+import { MarkdownPreview } from "../markdown/MarkdownPreview";
 import { useNotes } from "./useNotes";
 
 export function NotesView() {
-  const { notes, loading, error, addNote, convertNote, removeNote } = useNotes();
+  const { notes, loading, error, addNote, editNote, convertNote, removeNote } = useNotes();
   const [content, setContent] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingContent, setEditingContent] = useState("");
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -29,6 +32,33 @@ export function NotesView() {
     try {
       await addNote(nextContent);
       setContent("");
+      setFeedback("已收进灵感");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function startEdit(note: Note) {
+    setEditingId(note.id);
+    setEditingContent(note.content);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditingContent("");
+  }
+
+  async function saveEdit() {
+    if (!editingId || saving) return;
+
+    const nextContent = editingContent.trim();
+    if (!nextContent) return;
+
+    setSaving(true);
+    try {
+      await editNote(editingId, nextContent);
+      cancelEdit();
+      setFeedback("灵感已更新");
     } finally {
       setSaving(false);
     }
@@ -44,7 +74,8 @@ export function NotesView() {
       <MarkdownEditor
         value={content}
         onChange={setContent}
-        placeholder="记下一点灵感或随笔"
+        onSubmit={() => void saveNote()}
+        placeholder="记下一点灵感、随笔或 Markdown 片段"
       />
       <button
         type="button"
@@ -63,20 +94,47 @@ export function NotesView() {
         <div className="notes-list grid min-h-0 gap-1.5 overflow-auto pr-1">
           {notes.map((note) => (
             <article key={note.id} className="note-card grid min-w-0 gap-1.5 px-2 py-1.5 text-sm leading-5">
-              <p className="line-clamp-4 min-w-0 whitespace-pre-wrap break-words">{note.content}</p>
-              <div className="flex min-w-0 items-center justify-end gap-1">
-                <button type="button" className="note-action" onClick={() => void convert(note, "today")}>
-                  <ArrowRight size={12} />
-                  今日
-                </button>
-                <button type="button" className="note-action" onClick={() => void convert(note, "week")}>
-                  <ArrowRight size={12} />
-                  本周
-                </button>
-                <IconButton label="删除" onClick={() => void removeNote(note.id)}>
-                  <Trash2 size={13} />
-                </IconButton>
-              </div>
+              {editingId === note.id ? (
+                <>
+                  <MarkdownEditor
+                    value={editingContent}
+                    onChange={setEditingContent}
+                    onSubmit={() => void saveEdit()}
+                    placeholder="编辑这条灵感"
+                  />
+                  <div className="flex min-w-0 items-center justify-end gap-1">
+                    <button type="button" className="note-action" disabled={saving || !editingContent.trim()} onClick={() => void saveEdit()}>
+                      <Check size={12} />
+                      保存
+                    </button>
+                    <button type="button" className="note-action" onClick={cancelEdit}>
+                      <X size={12} />
+                      取消
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <MarkdownPreview content={note.content} className="markdown-preview-card" />
+                  <div className="flex min-w-0 items-center justify-end gap-1">
+                    <button type="button" className="note-action" onClick={() => void convert(note, "today")}>
+                      <ArrowRight size={12} />
+                      今日
+                    </button>
+                    <button type="button" className="note-action" onClick={() => void convert(note, "week")}>
+                      <ArrowRight size={12} />
+                      本周
+                    </button>
+                    <button type="button" className="note-action" onClick={() => startEdit(note)}>
+                      <Pencil size={12} />
+                      编辑
+                    </button>
+                    <IconButton label="删除" onClick={() => void removeNote(note.id)}>
+                      <Trash2 size={13} />
+                    </IconButton>
+                  </div>
+                </>
+              )}
             </article>
           ))}
         </div>

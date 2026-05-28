@@ -1,10 +1,20 @@
-import { ClipboardList, Download, Droplets, Image, Palette, Tags, Type } from "lucide-react";
+import { invoke } from "@tauri-apps/api/core";
+import { ClipboardList, Download, Droplets, Image, Palette, RotateCcw, Tags, Type } from "lucide-react";
 import { buildExportSnapshot, exportSnapshotAsJson, exportSnapshotAsMarkdown } from "../../data/exportRepository";
 import {
+  DEFAULT_DASHBOARD_BACKGROUND,
   DEFAULT_DASHBOARD_HERO_KICKER,
   DEFAULT_DASHBOARD_HERO_TITLE,
 } from "../../data/settingsRepository";
-import type { DashboardBackgroundPreset, FontStyleName, MainWindowStyle, PaperOpacityName, ReviewMode, TaskLabel } from "../../types/domain";
+import type {
+  DashboardBackgroundPreset,
+  DashboardBackgroundSetting,
+  FontStyleName,
+  MainWindowStyle,
+  PaperOpacityName,
+  ReviewMode,
+  TaskLabel,
+} from "../../types/domain";
 import { useTaskLabels } from "../tasks/useTaskLabels";
 import type { useSettings } from "./useSettings";
 
@@ -39,6 +49,12 @@ const backgroundPresets: Array<{ id: DashboardBackgroundPreset; label: string }>
   { id: "grid", label: "浅格" },
   { id: "night", label: "夜读" },
   { id: "green", label: "墨绿" },
+];
+
+const backgroundFits: Array<{ id: DashboardBackgroundSetting["fit"]; label: string }> = [
+  { id: "cover", label: "填充" },
+  { id: "contain", label: "完整显示" },
+  { id: "repeat", label: "平铺" },
 ];
 
 interface DashboardSettingsViewProps {
@@ -93,11 +109,21 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
   async function exportData(format: "markdown" | "json") {
     const snapshot = await buildExportSnapshot();
     const content = format === "markdown" ? exportSnapshotAsMarkdown(snapshot) : exportSnapshotAsJson(snapshot);
+    const fileName = `浮笺导出-${new Date().toISOString().slice(0, 10)}.${format === "markdown" ? "md" : "json"}`;
+
+    try {
+      const savedPath = await invoke<string>("save_export_file", { fileName, contents: content });
+      window.alert(`已导出到：${savedPath}`);
+      return;
+    } catch {
+      // Keep browser preview/dev usable if the native command is unavailable.
+    }
+
     const blob = new Blob([content], { type: format === "markdown" ? "text/markdown;charset=utf-8" : "application/json;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `浮笺导出-${new Date().toISOString().slice(0, 10)}.${format === "markdown" ? "md" : "json"}`;
+    link.download = fileName;
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -127,6 +153,98 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
         <h1>把浮笺调成顺手的样子</h1>
       </div>
       <section className="settings-grid">
+        <article className="settings-card settings-card-wide background-settings-card">
+          <h2>
+            <Image size={18} /> 主窗口背景
+          </h2>
+          <div className="dashboard-background-config">
+            <div className="dashboard-background-preview" style={settings.dashboardBackgroundStyle}>
+              <span className="dashboard-background-preview-layer" />
+              <div>
+                <strong>{settings.dashboardBackground.mode === "image" ? "自定义图片" : "预设背景"}</strong>
+                <small>透明度、遮罩和适配方式会同步到主窗口</small>
+              </div>
+            </div>
+            <div className="dashboard-background-controls">
+              <div className="settings-options">
+                {backgroundPresets.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`setting-chip ${settings.dashboardBackground.mode === "preset" && settings.dashboardBackground.preset === item.id ? "is-active" : ""}`}
+                    onClick={() => void settings.setDashboardBackground({ ...settings.dashboardBackground, mode: "preset", preset: item.id })}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+                <label className="setting-chip setting-file-chip">
+                  选择图片
+                  <input type="file" accept="image/*" onChange={(event) => handleBackgroundFile(event.currentTarget.files?.[0] ?? null)} />
+                </label>
+              </div>
+              <div className="settings-options background-fit-options">
+                {backgroundFits.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`setting-chip ${settings.dashboardBackground.fit === item.id ? "is-active" : ""}`}
+                    onClick={() => void settings.setDashboardBackground({ ...settings.dashboardBackground, fit: item.id })}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <div className="settings-range-grid">
+                <label>
+                  <span>可见度</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.85"
+                    step="0.02"
+                    value={settings.dashboardBackground.opacity}
+                    onChange={(event) =>
+                      void settings.setDashboardBackground({ ...settings.dashboardBackground, opacity: Number(event.currentTarget.value) })
+                    }
+                  />
+                </label>
+                <label>
+                  <span>模糊</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="16"
+                    step="1"
+                    value={settings.dashboardBackground.blur}
+                    onChange={(event) =>
+                      void settings.setDashboardBackground({ ...settings.dashboardBackground, blur: Number(event.currentTarget.value) })
+                    }
+                  />
+                </label>
+                <label>
+                  <span>压暗</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="0.5"
+                    step="0.02"
+                    value={settings.dashboardBackground.dim}
+                    onChange={(event) =>
+                      void settings.setDashboardBackground({ ...settings.dashboardBackground, dim: Number(event.currentTarget.value) })
+                    }
+                  />
+                </label>
+              </div>
+              <div className="settings-actions">
+                <button type="button" onClick={() => void settings.setDashboardBackground(DEFAULT_DASHBOARD_BACKGROUND)}>
+                  <RotateCcw size={14} />
+                  恢复默认背景
+                </button>
+              </div>
+            </div>
+          </div>
+        </article>
+
         <article className="settings-card settings-card-wide">
           <h2>
             <Palette size={18} /> 主窗口形态
@@ -235,63 +353,6 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
             >
               恢复默认文案
             </button>
-          </div>
-        </article>
-
-        <article className="settings-card settings-card-wide">
-          <h2>
-            <Image size={18} /> 主窗口背景
-          </h2>
-          <div className="settings-options">
-            {backgroundPresets.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`setting-chip ${settings.dashboardBackground.mode === "preset" && settings.dashboardBackground.preset === item.id ? "is-active" : ""}`}
-                onClick={() => void settings.setDashboardBackground({ ...settings.dashboardBackground, mode: "preset", preset: item.id })}
-              >
-                {item.label}
-              </button>
-            ))}
-            <label className="setting-chip setting-file-chip">
-              选择图片
-              <input type="file" accept="image/*" onChange={(event) => handleBackgroundFile(event.currentTarget.files?.[0] ?? null)} />
-            </label>
-          </div>
-          <div className="settings-range-grid">
-            <label>
-              <span>可见度</span>
-              <input
-                type="range"
-                min="0"
-                max="0.8"
-                step="0.02"
-                value={settings.dashboardBackground.opacity}
-                onChange={(event) => void settings.setDashboardBackground({ ...settings.dashboardBackground, opacity: Number(event.currentTarget.value) })}
-              />
-            </label>
-            <label>
-              <span>模糊</span>
-              <input
-                type="range"
-                min="0"
-                max="16"
-                step="1"
-                value={settings.dashboardBackground.blur}
-                onChange={(event) => void settings.setDashboardBackground({ ...settings.dashboardBackground, blur: Number(event.currentTarget.value) })}
-              />
-            </label>
-            <label>
-              <span>压暗</span>
-              <input
-                type="range"
-                min="0"
-                max="0.5"
-                step="0.02"
-                value={settings.dashboardBackground.dim}
-                onChange={(event) => void settings.setDashboardBackground({ ...settings.dashboardBackground, dim: Number(event.currentTarget.value) })}
-              />
-            </label>
           </div>
         </article>
 

@@ -1,3 +1,4 @@
+import { listen } from "@tauri-apps/api/event";
 import { useCallback, useEffect, useState } from "react";
 import { deleteReminder, dismissReminder, listReminders } from "../../data/remindersRepository";
 import type { Reminder } from "../../types/domain";
@@ -17,6 +18,16 @@ export function useReminders() {
 
   useEffect(() => {
     void reload();
+  }, [reload]);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    listen("reminders:changed", () => {
+      void reload();
+    }).then((fn) => {
+      unlisten = fn;
+    });
+    return () => unlisten?.();
   }, [reload]);
 
   async function dismiss(id: string) {

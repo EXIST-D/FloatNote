@@ -1,3 +1,4 @@
+import { emit } from "@tauri-apps/api/event";
 import { isPermissionGranted, requestPermission, sendNotification } from "@tauri-apps/plugin-notification";
 import { useEffect } from "react";
 import { listDueReminders, markReminderSent } from "../../data/remindersRepository";
@@ -21,6 +22,7 @@ export function useReminderScheduler(onTriggered?: () => void) {
         }
         await markReminderSent(reminder.id);
       }
+      await emit("reminders:changed");
       onTriggered?.();
     }
 
