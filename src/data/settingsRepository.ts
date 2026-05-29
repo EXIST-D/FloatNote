@@ -203,12 +203,12 @@ export async function setFontFamily(fontFamily: FontFamilyName) {
 
 export async function getFloatingOpacity() {
   const saved = await getSetting("floating_opacity");
-  if (saved !== null) return clampNumber(saved, 0.7, 1, DEFAULT_FLOATING_OPACITY);
+  if (saved !== null) return clampNumber(saved, 0, 1, DEFAULT_FLOATING_OPACITY);
   return mapLegacyPaperOpacity(await getSetting("paper_opacity"));
 }
 
 export async function setFloatingOpacity(opacity: number) {
-  await setSetting("floating_opacity", String(Math.min(Math.max(opacity, 0.7), 1)));
+  await setSetting("floating_opacity", String(Math.min(Math.max(opacity, 0), 1)));
 }
 
 export async function getDashboardAppearance() {
@@ -231,7 +231,7 @@ export async function getDashboardAppearance() {
   return {
     baseColor: isHexColor(baseColor) ? baseColor : DEFAULT_DASHBOARD_APPEARANCE.baseColor,
     accentColor: isHexColor(accentColor) ? accentColor : DEFAULT_DASHBOARD_APPEARANCE.accentColor,
-    opacity: clampNumber(opacity, 0.85, 1, DEFAULT_DASHBOARD_APPEARANCE.opacity),
+    opacity: clampNumber(opacity, 0, 1, DEFAULT_DASHBOARD_APPEARANCE.opacity),
     backgroundImageDataUrl: nextImageDataUrl,
     backgroundFit: isDashboardBackgroundFit(fit) ? fit : legacyFit,
   };
@@ -241,7 +241,7 @@ export async function setDashboardAppearance(setting: DashboardAppearanceSetting
   await Promise.all([
     setSetting("dashboard_base_color", isHexColor(setting.baseColor) ? setting.baseColor : DEFAULT_DASHBOARD_APPEARANCE.baseColor),
     setSetting("dashboard_accent_color", isHexColor(setting.accentColor) ? setting.accentColor : DEFAULT_DASHBOARD_APPEARANCE.accentColor),
-    setSetting("dashboard_opacity", String(Math.min(Math.max(setting.opacity, 0.85), 1))),
+    setSetting("dashboard_opacity", String(Math.min(Math.max(setting.opacity, 0), 1))),
     setSetting("dashboard_background_image", setting.backgroundImageDataUrl ?? ""),
     setSetting("dashboard_background_fit", isDashboardBackgroundFit(setting.backgroundFit) ? setting.backgroundFit : DEFAULT_DASHBOARD_APPEARANCE.backgroundFit),
   ]);

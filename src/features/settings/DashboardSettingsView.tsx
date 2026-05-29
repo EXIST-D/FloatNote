@@ -91,6 +91,7 @@ function LabelEditorRow({
 }) {
   return (
     <div className="task-label-editor-row">
+      <span className="task-label-color-dot" style={{ background: label.color }} />
       <input
         aria-label="标签名称"
         defaultValue={label.name}
@@ -98,6 +99,7 @@ function LabelEditorRow({
       />
       <input
         aria-label={`${label.name} 颜色`}
+        className="task-label-color-input"
         type="color"
         value={label.color}
         onChange={(event) => void onEdit(label.id, { name: label.name, color: event.currentTarget.value })}
@@ -209,7 +211,7 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
                 <input
                   aria-label="主窗口透明度"
                   type="range"
-                  min="0.85"
+                  min="0"
                   max="1"
                   step="0.01"
                   value={settings.dashboardAppearance.opacity}
@@ -249,7 +251,7 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
                 <input
                   aria-label="浮笺透明度"
                   type="range"
-                  min="0.7"
+                  min="0"
                   max="1"
                   step="0.01"
                   value={settings.floatingOpacity}
@@ -345,9 +347,18 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
           </SettingsSection>
 
           <SettingsSection id="settings-labels" icon={<Tags size={18} />} title="标签">
-            <SettingsRow title="任务等级标签" description="自定义任务优先级名称、颜色和默认等级">
+            <div className="settings-label-block">
+              <div className="settings-label-head">
+                <div>
+                  <strong>任务等级标签</strong>
+                  <span>自定义任务优先级名称、颜色和默认等级</span>
+                </div>
+                <button type="button" className="secondary-action" onClick={() => void taskLabels.addLabel()} disabled={taskLabels.loading}>
+                  新增标签
+                </button>
+              </div>
+              {taskLabels.error && <p className="settings-error">{taskLabels.error}</p>}
               <div className="task-label-editor">
-                {taskLabels.error && <p className="settings-error">{taskLabels.error}</p>}
                 {taskLabels.labels.map((label) => (
                   <LabelEditorRow
                     key={label.id}
@@ -357,11 +368,8 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
                     onDelete={removeLabel}
                   />
                 ))}
-                <button type="button" className="secondary-action" onClick={() => void taskLabels.addLabel()} disabled={taskLabels.loading}>
-                  新增等级标签
-                </button>
               </div>
-            </SettingsRow>
+            </div>
           </SettingsSection>
         </div>
       </div>

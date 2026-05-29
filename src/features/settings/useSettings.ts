@@ -86,7 +86,7 @@ function isAppearancePayload(value: unknown): value is AppearancePayload {
     isThemeName(payload.theme ?? null) &&
     isFontFamilyName(payload.fontFamily) &&
     typeof payload.floatingOpacity === "number" &&
-    payload.floatingOpacity >= 0.7 &&
+    payload.floatingOpacity >= 0 &&
     payload.floatingOpacity <= 1 &&
     typeof payload.priorityColors === "object" &&
     payload.priorityColors !== null
@@ -274,7 +274,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
 
   const setFloatingOpacity = useCallback(
     async (nextOpacity: number) => {
-      const clamped = clampOpacity(nextOpacity, 0.7, 1, DEFAULT_FLOATING_OPACITY);
+      const clamped = clampOpacity(nextOpacity, 0, 1, DEFAULT_FLOATING_OPACITY);
       setFloatingOpacityState(clamped);
       applyAppearance(theme, fontFamily, clamped, priorityColors);
       await saveFloatingOpacity(clamped);
@@ -333,8 +333,8 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
       "--dashboard-accent-color": dashboardAppearance.accentColor,
       "--dashboard-opacity": String(dashboardAppearance.opacity),
       "--dashboard-bg-image": backgroundImage,
-      "--dashboard-bg-opacity": backgroundImage === "none" ? "0" : "0.2",
-      "--dashboard-bg-dim": backgroundImage === "none" ? "0" : "0.05",
+      "--dashboard-bg-opacity": backgroundImage === "none" ? "0" : "0.34",
+      "--dashboard-bg-dim": backgroundImage === "none" ? "0" : "0.08",
       "--dashboard-bg-blur": "0px",
       "--dashboard-bg-size": dashboardAppearance.backgroundFit === "repeat" ? "auto" : dashboardAppearance.backgroundFit,
       "--dashboard-bg-repeat": dashboardAppearance.backgroundFit === "repeat" ? "repeat" : "no-repeat",

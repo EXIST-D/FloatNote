@@ -3102,9 +3102,10 @@ textarea:focus,
 
 .dashboard-shell {
   --desk-bg: color-mix(in srgb, var(--dashboard-base-color, #f4f6f9) calc(var(--dashboard-opacity, 1) * 100%), transparent);
-  --desk-surface: rgb(255 255 255 / var(--dashboard-opacity, 1));
-  --desk-surface-soft: rgb(248 250 252 / calc(var(--dashboard-opacity, 1) * 0.96));
-  --desk-sidebar: rgb(247 248 251 / calc(var(--dashboard-opacity, 1) * 0.96));
+  --desk-surface-tint: color-mix(in srgb, var(--dashboard-base-color, #f4f6f9) 14%, white);
+  --desk-surface: color-mix(in srgb, var(--desk-surface-tint) calc(var(--dashboard-opacity, 1) * 100%), transparent);
+  --desk-surface-soft: color-mix(in srgb, var(--dashboard-base-color, #f4f6f9) 24%, white);
+  --desk-sidebar: color-mix(in srgb, var(--dashboard-base-color, #f4f6f9) 18%, white);
   --desk-surface-hover: color-mix(in srgb, var(--dashboard-accent-color, #2563eb) 7%, white);
   --desk-accent: var(--dashboard-accent-color, #2563eb);
   --desk-accent-strong: color-mix(in srgb, var(--dashboard-accent-color, #2563eb) 82%, black);
@@ -3224,7 +3225,13 @@ textarea:focus,
   min-width: 0;
   min-height: 0;
   padding: 0;
-  background: var(--desk-bg);
+  background-color: var(--desk-bg);
+  background-image:
+    linear-gradient(rgb(244 246 249 / var(--dashboard-bg-dim, 0)), rgb(244 246 249 / var(--dashboard-bg-dim, 0))),
+    var(--dashboard-bg-image);
+  background-position: center;
+  background-repeat: var(--dashboard-bg-repeat, no-repeat);
+  background-size: var(--dashboard-bg-size, cover);
 }
 
 .dashboard-content > section:not(.dashboard-page) {
@@ -3245,7 +3252,7 @@ textarea:focus,
   height: 100%;
   grid-template-rows: auto auto minmax(0, 1fr);
   gap: 0;
-  background: var(--desk-bg);
+  background: transparent;
 }
 
 .dashboard-command-bar {
@@ -3890,36 +3897,92 @@ textarea:focus,
   color: var(--desk-accent-strong);
 }
 
+.settings-label-block {
+  display: grid;
+  gap: 14px;
+  padding: 20px 24px;
+}
+
+.settings-label-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-label-head > div {
+  display: grid;
+  gap: 5px;
+}
+
+.settings-label-head strong {
+  color: var(--desk-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.settings-label-head span {
+  color: var(--desk-muted);
+  font-size: 13px;
+}
+
 .settings-page-quiet .task-label-editor {
   display: grid;
-  width: min(100%, 560px);
   gap: 8px;
 }
 
 .settings-page-quiet .task-label-editor-row {
   display: grid;
-  grid-template-columns: minmax(140px, 1fr) 42px auto auto;
-  gap: 8px;
+  min-height: 46px;
+  grid-template-columns: 14px minmax(180px, 1fr) 44px auto auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--desk-border-subtle);
+  border-radius: var(--desk-radius-md);
+  background: var(--desk-surface-soft);
+  padding: 8px 10px;
+}
+
+.task-label-color-dot {
+  width: 10px;
+  height: 26px;
+  border-radius: 999px;
 }
 
 .settings-page-quiet .task-label-editor-row input:not([type="color"]) {
   width: 100%;
-  height: 34px;
-  border: 1px solid var(--desk-border);
+  height: 32px;
+  border: 1px solid transparent;
   border-radius: var(--desk-radius-sm);
-  background: #eef2f7;
+  background: transparent;
   color: var(--desk-text);
   font-family: var(--font-body);
-  padding: 0 10px;
+  padding: 0 8px;
+}
+
+.settings-page-quiet .task-label-editor-row input:not([type="color"]):focus {
+  border-color: var(--desk-accent);
+  background: var(--desk-surface);
 }
 
 .settings-page-quiet .task-label-editor-row input[type="color"] {
-  width: 42px;
-  height: 34px;
+  width: 38px;
+  height: 30px;
   border: 1px solid var(--desk-border);
   border-radius: var(--desk-radius-sm);
-  background: #eef2f7;
+  background: var(--desk-surface);
   padding: 3px;
+}
+
+.settings-page-quiet .task-label-editor-row button {
+  min-height: 30px;
+  border: 1px solid var(--desk-border);
+  border-radius: var(--desk-radius-sm);
+  background: var(--desk-surface);
+  color: var(--desk-text);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  padding: 0 10px;
 }
 
 .dashboard-empty {
@@ -4028,11 +4091,16 @@ textarea:focus,
     justify-content: flex-start;
   }
 
+  .settings-label-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .settings-page-quiet .task-label-editor-row {
-    grid-template-columns: 1fr 42px;
+    grid-template-columns: 14px 1fr 42px;
   }
 
   .settings-page-quiet .task-label-editor-row button {
-    grid-column: span 1;
+    grid-column: span 3;
   }
 }
