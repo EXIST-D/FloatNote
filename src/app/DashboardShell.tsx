@@ -104,7 +104,7 @@ export function DashboardShell() {
   }, []);
 
   return (
-    <main className="dashboard-shell" data-main-window-style={settings.mainWindowStyle} style={settings.dashboardBackgroundStyle}>
+    <main className="dashboard-shell" style={settings.dashboardAppearanceStyle}>
       <DashboardNav activeTab={activeTab} onChange={changeTab} />
       <section className="dashboard-content">
         <ReviewPrompt

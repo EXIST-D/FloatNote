@@ -10,6 +10,8 @@ export type PaperOpacityName = "clear" | "soft" | "solid";
 
 export type MainWindowStyle = "desk" | "minimal" | "green";
 
+export type FontFamilyName = "yahei" | "songti" | "kaiti" | "fangsong";
+
 export type TaskPriority = "high" | "medium" | "low";
 
 export type TaskScope = "today" | "week";
@@ -140,4 +142,12 @@ export interface DashboardBackgroundSetting {
   blur: number;
   dim: number;
   fit: "cover" | "contain" | "repeat";
+}
+
+export interface DashboardAppearanceSetting {
+  baseColor: string;
+  accentColor: string;
+  opacity: number;
+  backgroundImageDataUrl: string | null;
+  backgroundFit: "cover" | "contain" | "repeat";
 }

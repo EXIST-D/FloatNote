@@ -1,65 +1,81 @@
 import { invoke } from "@tauri-apps/api/core";
-import { ClipboardList, Download, Droplets, Image, Palette, RotateCcw, Tags, Type } from "lucide-react";
+import { ClipboardList, Download, Image, Palette, Pin, RotateCcw, Tags } from "lucide-react";
+import type { ReactNode } from "react";
 import { DashboardPage } from "../../components/layout/DashboardPage";
 import { buildExportSnapshot, exportSnapshotAsJson, exportSnapshotAsMarkdown } from "../../data/exportRepository";
-import {
-  DEFAULT_DASHBOARD_BACKGROUND,
-  DEFAULT_DASHBOARD_HERO_KICKER,
-  DEFAULT_DASHBOARD_HERO_TITLE,
-} from "../../data/settingsRepository";
-import type {
-  DashboardBackgroundPreset,
-  DashboardBackgroundSetting,
-  FontStyleName,
-  MainWindowStyle,
-  PaperOpacityName,
-  ReviewMode,
-  TaskLabel,
-} from "../../types/domain";
+import { DEFAULT_DASHBOARD_HERO_KICKER, DEFAULT_DASHBOARD_HERO_TITLE } from "../../data/settingsRepository";
+import type { DashboardAppearanceSetting, FontFamilyName, ReviewMode, TaskLabel } from "../../types/domain";
 import { useTaskLabels } from "../tasks/useTaskLabels";
 import type { useSettings } from "./useSettings";
 
 type SettingsController = ReturnType<typeof useSettings>;
-
-const mainStyles: Array<{ id: MainWindowStyle; label: string; note: string }> = [
-  { id: "desk", label: "月光纸笺", note: "柔和纸面" },
-  { id: "minimal", label: "清简", note: "低噪整理" },
-  { id: "green", label: "墨绿", note: "沉静工作台" },
-];
-
-const fontStyles: Array<{ id: FontStyleName; label: string }> = [
-  { id: "clear", label: "清晰" },
-  { id: "bookish", label: "书卷" },
-  { id: "compact", label: "紧凑" },
-];
-
-const opacityStyles: Array<{ id: PaperOpacityName; label: string }> = [
-  { id: "clear", label: "清透" },
-  { id: "soft", label: "柔和" },
-  { id: "solid", label: "实色" },
-];
 
 const reviewModes: Array<{ id: ReviewMode; label: string }> = [
   { id: "manual_with_prompt", label: "手动结束 + 轻提示" },
   { id: "manual_only", label: "仅手动结束" },
 ];
 
-const backgroundPresets: Array<{ id: DashboardBackgroundPreset; label: string }> = [
-  { id: "moon", label: "月光" },
-  { id: "paper", label: "纸纹" },
-  { id: "grid", label: "浅格" },
-  { id: "night", label: "夜读" },
-  { id: "green", label: "墨绿" },
-];
-
-const backgroundFits: Array<{ id: DashboardBackgroundSetting["fit"]; label: string }> = [
+const backgroundFits: Array<{ id: DashboardAppearanceSetting["backgroundFit"]; label: string }> = [
   { id: "cover", label: "填充" },
   { id: "contain", label: "完整显示" },
   { id: "repeat", label: "平铺" },
 ];
 
+const fontFamilies: Array<{ id: FontFamilyName; label: string; sample: string }> = [
+  { id: "yahei", label: "微软雅黑", sample: "清晰现代" },
+  { id: "songti", label: "宋体", sample: "端正规整" },
+  { id: "kaiti", label: "楷体", sample: "书写感" },
+  { id: "fangsong", label: "仿宋", sample: "文稿感" },
+];
+
 interface DashboardSettingsViewProps {
   settings: SettingsController;
+}
+
+function formatPercent(value: number) {
+  return `${Math.round(value * 100)}%`;
+}
+
+function SettingsSection({
+  id,
+  icon,
+  title,
+  children,
+}: {
+  id: string;
+  icon: ReactNode;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="settings-section" id={id}>
+      <h2>
+        <span>{icon}</span>
+        {title}
+      </h2>
+      <div className="settings-panel">{children}</div>
+    </section>
+  );
+}
+
+function SettingsRow({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="settings-row">
+      <div className="settings-row-copy">
+        <strong>{title}</strong>
+        <span>{description}</span>
+      </div>
+      <div className="settings-row-control">{children}</div>
+    </div>
+  );
 }
 
 function LabelEditorRow({
@@ -142,266 +158,212 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result !== "string") return;
-      void settings.setDashboardBackground({ ...settings.dashboardBackground, mode: "image", imageDataUrl: reader.result });
+      void settings.setDashboardAppearance({ backgroundImageDataUrl: reader.result });
     };
     reader.readAsDataURL(file);
   }
 
   return (
     <DashboardPage
-      className="settings-page"
+      className="settings-page settings-page-quiet"
       eyebrow="设置中心"
       title="设置"
       description="外观、行为、标签和数据管理集中在这里"
     >
-      <div className="settings-layout">
+      <div className="settings-shell">
         <aside className="settings-side-nav" aria-label="设置分组">
           <a href="#settings-appearance">外观</a>
           <a href="#settings-behavior">行为</a>
           <a href="#settings-data">数据</a>
           <a href="#settings-labels">标签</a>
         </aside>
-        <section className="settings-grid">
-        <article className="settings-card settings-card-wide background-settings-card">
-          <h2 id="settings-appearance">
-            <Image size={18} /> 主窗口背景
-          </h2>
-          <div className="dashboard-background-config">
-            <div className="dashboard-background-preview" style={settings.dashboardBackgroundStyle}>
-              <span className="dashboard-background-preview-layer" />
-              <div>
-                <strong>{settings.dashboardBackground.mode === "image" ? "自定义图片" : "预设背景"}</strong>
-                <small>透明度、遮罩和适配方式会同步到主窗口</small>
-              </div>
-            </div>
-            <div className="dashboard-background-controls">
-              <div className="settings-options">
-                {backgroundPresets.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`setting-chip ${settings.dashboardBackground.mode === "preset" && settings.dashboardBackground.preset === item.id ? "is-active" : ""}`}
-                    onClick={() => void settings.setDashboardBackground({ ...settings.dashboardBackground, mode: "preset", preset: item.id })}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-                <label className="setting-chip setting-file-chip">
+
+        <div className="settings-sections">
+          <SettingsSection id="settings-appearance" icon={<Palette size={18} />} title="外观">
+            <SettingsRow title="主窗口底色" description="设置主窗口的基础颜色">
+              <label className="settings-color-control">
+                <span style={{ background: settings.dashboardAppearance.baseColor }} />
+                <input
+                  aria-label="主窗口底色"
+                  type="color"
+                  value={settings.dashboardAppearance.baseColor}
+                  onChange={(event) => void settings.setDashboardAppearance({ baseColor: event.currentTarget.value })}
+                />
+                <em>{settings.dashboardAppearance.baseColor.toUpperCase()}</em>
+              </label>
+            </SettingsRow>
+            <SettingsRow title="主窗口强调色" description="影响选中态、按钮和焦点边框">
+              <label className="settings-color-control">
+                <span style={{ background: settings.dashboardAppearance.accentColor }} />
+                <input
+                  aria-label="主窗口强调色"
+                  type="color"
+                  value={settings.dashboardAppearance.accentColor}
+                  onChange={(event) => void settings.setDashboardAppearance({ accentColor: event.currentTarget.value })}
+                />
+                <em>{settings.dashboardAppearance.accentColor.toUpperCase()}</em>
+              </label>
+            </SettingsRow>
+            <SettingsRow title="主窗口透明度" description="只影响主窗口，不影响桌面浮笺">
+              <label className="settings-range-control">
+                <input
+                  aria-label="主窗口透明度"
+                  type="range"
+                  min="0.85"
+                  max="1"
+                  step="0.01"
+                  value={settings.dashboardAppearance.opacity}
+                  onChange={(event) => void settings.setDashboardAppearance({ opacity: Number(event.currentTarget.value) })}
+                />
+                <span>{formatPercent(settings.dashboardAppearance.opacity)}</span>
+              </label>
+            </SettingsRow>
+            <SettingsRow title="主窗口背景图片" description="选择一张本地图片作为主窗口背景">
+              <div className="settings-inline-actions">
+                <label className="settings-file-button">
+                  <Image size={14} />
                   选择图片
                   <input type="file" accept="image/*" onChange={(event) => handleBackgroundFile(event.currentTarget.files?.[0] ?? null)} />
                 </label>
-              </div>
-              <div className="settings-options background-fit-options">
-                {backgroundFits.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`setting-chip ${settings.dashboardBackground.fit === item.id ? "is-active" : ""}`}
-                    onClick={() => void settings.setDashboardBackground({ ...settings.dashboardBackground, fit: item.id })}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-              <div className="settings-range-grid">
-                <label>
-                  <span>可见度</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="0.85"
-                    step="0.02"
-                    value={settings.dashboardBackground.opacity}
-                    onChange={(event) =>
-                      void settings.setDashboardBackground({ ...settings.dashboardBackground, opacity: Number(event.currentTarget.value) })
-                    }
-                  />
-                </label>
-                <label>
-                  <span>模糊</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="16"
-                    step="1"
-                    value={settings.dashboardBackground.blur}
-                    onChange={(event) =>
-                      void settings.setDashboardBackground({ ...settings.dashboardBackground, blur: Number(event.currentTarget.value) })
-                    }
-                  />
-                </label>
-                <label>
-                  <span>压暗</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="0.5"
-                    step="0.02"
-                    value={settings.dashboardBackground.dim}
-                    onChange={(event) =>
-                      void settings.setDashboardBackground({ ...settings.dashboardBackground, dim: Number(event.currentTarget.value) })
-                    }
-                  />
-                </label>
-              </div>
-              <div className="settings-actions">
-                <button type="button" onClick={() => void settings.setDashboardBackground(DEFAULT_DASHBOARD_BACKGROUND)}>
-                  <RotateCcw size={14} />
-                  恢复默认背景
+                <button type="button" onClick={() => void settings.setDashboardAppearance({ backgroundImageDataUrl: null })}>
+                  清除图片
                 </button>
               </div>
-            </div>
-          </div>
-        </article>
-
-        <article className="settings-card settings-card-wide">
-          <h2>
-            <Palette size={18} /> 主窗口形态
-          </h2>
-          <div className="settings-options settings-swatch-row">
-            {mainStyles.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`setting-chip setting-swatch ${settings.mainWindowStyle === item.id ? "is-active" : ""}`}
-                onClick={() => void settings.setMainWindowStyle(item.id)}
+            </SettingsRow>
+            <SettingsRow title="图片适配方式" description="控制背景图片的填充方式">
+              <select
+                value={settings.dashboardAppearance.backgroundFit}
+                onChange={(event) =>
+                  void settings.setDashboardAppearance({ backgroundFit: event.currentTarget.value as DashboardAppearanceSetting["backgroundFit"] })
+                }
               >
-                <span className={`swatch-preview swatch-preview-${item.id}`} />
-                <strong>{item.label}</strong>
-                <small>{item.note}</small>
-              </button>
-            ))}
-          </div>
-        </article>
-
-        <article className="settings-card">
-          <h2 id="settings-behavior">
-            <ClipboardList size={18} /> 复盘方式
-          </h2>
-          <div className="settings-options">
-            {reviewModes.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`setting-chip ${settings.reviewMode === item.id ? "is-active" : ""}`}
-                onClick={() => void settings.setReviewMode(item.id)}
+                {backgroundFits.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </SettingsRow>
+            <SettingsRow title="浮笺透明度" description="只影响桌面浮窗的纸面透明度">
+              <label className="settings-range-control">
+                <input
+                  aria-label="浮笺透明度"
+                  type="range"
+                  min="0.7"
+                  max="1"
+                  step="0.01"
+                  value={settings.floatingOpacity}
+                  onChange={(event) => void settings.setFloatingOpacity(Number(event.currentTarget.value))}
+                />
+                <span>{formatPercent(settings.floatingOpacity)}</span>
+              </label>
+            </SettingsRow>
+            <SettingsRow title="中文字体" description="影响主窗口、浮笺、任务和输入内容">
+              <select
+                value={settings.fontFamily}
+                onChange={(event) => void settings.setFontFamily(event.currentTarget.value as FontFamilyName)}
               >
-                {item.label}
+                {fontFamilies.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label} - {item.sample}
+                  </option>
+                ))}
+              </select>
+            </SettingsRow>
+            <SettingsRow title="恢复默认外观" description="恢复主窗口颜色、透明度和背景图片">
+              <button type="button" className="secondary-action" onClick={() => void settings.resetDashboardAppearance()}>
+                <RotateCcw size={14} />
+                恢复默认
               </button>
-            ))}
-          </div>
-        </article>
+            </SettingsRow>
+          </SettingsSection>
 
-        <article className="settings-card">
-          <h2>
-            <Type size={18} /> 字感
-          </h2>
-          <div className="settings-options">
-            {fontStyles.map((item) => (
+          <SettingsSection id="settings-behavior" icon={<ClipboardList size={18} />} title="行为">
+            <SettingsRow title="复盘方式" description="设置今日和本周结束时的复盘行为">
+              <select value={settings.reviewMode} onChange={(event) => void settings.setReviewMode(event.currentTarget.value as ReviewMode)}>
+                {reviewModes.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </SettingsRow>
+            <SettingsRow title="浮笺置顶" description="让桌面浮笺保持在其它窗口上方">
               <button
-                key={item.id}
                 type="button"
-                className={`setting-chip ${settings.fontStyle === item.id ? "is-active" : ""}`}
-                onClick={() => void settings.setFontStyle(item.id)}
+                className={`settings-toggle ${settings.alwaysOnTop ? "is-active" : ""}`}
+                onClick={() => void settings.setAlwaysOnTop(!settings.alwaysOnTop)}
               >
-                {item.label}
+                <Pin size={14} />
+                {settings.alwaysOnTop ? "已启用" : "已关闭"}
               </button>
-            ))}
-          </div>
-        </article>
-
-        <article className="settings-card">
-          <h2>
-            <Droplets size={18} /> 纸面透明度
-          </h2>
-          <div className="settings-options">
-            {opacityStyles.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`setting-chip ${settings.paperOpacity === item.id ? "is-active" : ""}`}
-                onClick={() => void settings.setPaperOpacity(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </article>
-
-        <article className="settings-card settings-card-wide">
-          <h2>
-            <Type size={18} /> 首页文案
-          </h2>
-          <label className="settings-field">
-            <span>小标题</span>
-            <input
-              value={settings.dashboardHeroCopy.kicker}
-              onChange={(event) =>
-                void settings.setDashboardHeroCopy({ ...settings.dashboardHeroCopy, kicker: event.currentTarget.value })
-              }
-            />
-          </label>
-          <label className="settings-field">
-            <span>主标题</span>
-            <input
-              value={settings.dashboardHeroCopy.title}
-              onChange={(event) =>
-                void settings.setDashboardHeroCopy({ ...settings.dashboardHeroCopy, title: event.currentTarget.value })
-              }
-            />
-          </label>
-          <div className="settings-actions">
-            <button
-              type="button"
-              onClick={() =>
-                void settings.setDashboardHeroCopy({
-                  kicker: DEFAULT_DASHBOARD_HERO_KICKER,
-                  title: DEFAULT_DASHBOARD_HERO_TITLE,
-                })
-              }
-            >
-              恢复默认文案
-            </button>
-          </div>
-        </article>
-
-        <article className="settings-card settings-card-wide">
-          <h2 id="settings-data">
-            <Download size={18} /> 导出数据
-          </h2>
-          <div className="settings-actions">
-            <button type="button" onClick={() => void exportData("markdown")}>
-              导出 Markdown
-            </button>
-            <button type="button" onClick={() => void exportData("json")}>
-              导出 JSON
-            </button>
-          </div>
-        </article>
-
-        <article className="settings-card settings-card-wide">
-          <h2 id="settings-labels">
-            <Tags size={18} /> 任务等级标签
-          </h2>
-          {taskLabels.error && <p className="settings-error">{taskLabels.error}</p>}
-          <div className="task-label-editor">
-            {taskLabels.labels.map((label) => (
-              <LabelEditorRow
-                key={label.id}
-                label={label}
-                onEdit={taskLabels.editLabel}
-                onDefault={taskLabels.makeDefault}
-                onDelete={removeLabel}
+            </SettingsRow>
+            <SettingsRow title="首页小标题" description="自定义主窗口速览页的短标题">
+              <input
+                value={settings.dashboardHeroCopy.kicker}
+                onChange={(event) =>
+                  void settings.setDashboardHeroCopy({ ...settings.dashboardHeroCopy, kicker: event.currentTarget.value })
+                }
               />
-            ))}
-          </div>
-          <div className="settings-actions">
-            <button type="button" onClick={() => void taskLabels.addLabel()} disabled={taskLabels.loading}>
-              新增等级标签
-            </button>
-          </div>
-        </article>
-        </section>
+            </SettingsRow>
+            <SettingsRow title="首页说明" description="自定义主窗口速览页的说明文案">
+              <input
+                value={settings.dashboardHeroCopy.title}
+                onChange={(event) =>
+                  void settings.setDashboardHeroCopy({ ...settings.dashboardHeroCopy, title: event.currentTarget.value })
+                }
+              />
+            </SettingsRow>
+            <SettingsRow title="恢复默认文案" description="恢复速览页默认标题和说明">
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={() =>
+                  void settings.setDashboardHeroCopy({
+                    kicker: DEFAULT_DASHBOARD_HERO_KICKER,
+                    title: DEFAULT_DASHBOARD_HERO_TITLE,
+                  })
+                }
+              >
+                <RotateCcw size={14} />
+                恢复文案
+              </button>
+            </SettingsRow>
+          </SettingsSection>
+
+          <SettingsSection id="settings-data" icon={<Download size={18} />} title="数据">
+            <SettingsRow title="导出 Markdown" description="导出为适合阅读和归档的 Markdown 文件">
+              <button type="button" className="secondary-action" onClick={() => void exportData("markdown")}>
+                导出 Markdown
+              </button>
+            </SettingsRow>
+            <SettingsRow title="导出 JSON" description="导出完整备份数据，便于后续恢复或迁移">
+              <button type="button" className="secondary-action" onClick={() => void exportData("json")}>
+                导出 JSON
+              </button>
+            </SettingsRow>
+          </SettingsSection>
+
+          <SettingsSection id="settings-labels" icon={<Tags size={18} />} title="标签">
+            <SettingsRow title="任务等级标签" description="自定义任务优先级名称、颜色和默认等级">
+              <div className="task-label-editor">
+                {taskLabels.error && <p className="settings-error">{taskLabels.error}</p>}
+                {taskLabels.labels.map((label) => (
+                  <LabelEditorRow
+                    key={label.id}
+                    label={label}
+                    onEdit={taskLabels.editLabel}
+                    onDefault={taskLabels.makeDefault}
+                    onDelete={removeLabel}
+                  />
+                ))}
+                <button type="button" className="secondary-action" onClick={() => void taskLabels.addLabel()} disabled={taskLabels.loading}>
+                  新增等级标签
+                </button>
+              </div>
+            </SettingsRow>
+          </SettingsSection>
+        </div>
       </div>
     </DashboardPage>
   );
