@@ -2249,7 +2249,7 @@ textarea:focus,
 .markdown-studio {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 14px;
+  gap: 12px;
   overflow: hidden;
 }
 
@@ -2300,22 +2300,16 @@ textarea:focus,
 .markdown-studio-layout {
   display: grid;
   min-height: 0;
-  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+  gap: 12px;
 }
 
 .markdown-studio-layout-vditor {
-  gap: 12px;
-  grid-template-columns: minmax(170px, 220px) minmax(0, 1fr);
-}
-
-.markdown-studio-layout-vditor.is-outline-open {
-  grid-template-columns: minmax(160px, 210px) minmax(0, 1fr);
+  grid-template-columns: minmax(184px, 232px) minmax(0, 1fr);
 }
 
 .markdown-studio-sidebar,
-.markdown-studio-editor,
-.markdown-outline-panel-vditor {
+.markdown-editor-shell {
   min-width: 0;
   min-height: 0;
   border: 1px solid var(--border-subtle);
@@ -2393,39 +2387,66 @@ textarea:focus,
   opacity: 0.72;
 }
 
-.markdown-studio-editor {
+.markdown-editor-shell {
   position: relative;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 10px;
+  gap: 8px;
   overflow: hidden;
-  padding: 12px;
+  padding: 10px;
   background:
-    radial-gradient(circle at 8% 0%, rgba(255, 229, 153, 0.22), transparent 28%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.16)),
-    rgba(255, 250, 240, calc(var(--paper-alpha) * 0.78));
+    linear-gradient(180deg, rgba(255, 253, 247, 0.76), rgba(255, 250, 240, 0.28)),
+    rgba(255, 250, 240, calc(var(--paper-alpha) * 0.84));
 }
 
-.markdown-studio-editor-actions {
+.markdown-editor-shell-header {
   display: flex;
   flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 6px;
   min-width: 0;
-  overflow: hidden;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(163, 139, 91, 0.16);
+  padding: 2px 2px 9px;
 }
 
-.markdown-editor-frame {
-  display: grid;
+.markdown-editor-title-block {
+  display: flex;
   min-width: 0;
-  min-height: 0;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-main);
+}
+
+.markdown-editor-title-block svg {
+  flex: 0 0 auto;
+  color: var(--accent);
+}
+
+.markdown-editor-title-block h3 {
+  margin: 0;
   overflow: hidden;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.58), rgba(255, 255, 255, 0.18)),
-    rgba(255, 250, 240, calc(var(--paper-alpha) * 0.9));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+  font-family: var(--font-title);
+  font-size: 16px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.markdown-editor-title-block span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.markdown-editor-shell-actions {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
 .markdown-editor-workspace {
@@ -2433,24 +2454,94 @@ textarea:focus,
   display: grid;
   min-width: 0;
   min-height: 0;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 10px;
-}
-
-.markdown-editor-workspace.is-outline-open {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.markdown-editor-frame-vditor {
-  grid-row: 2;
-  grid-template-rows: minmax(0, 1fr);
-  min-width: 0;
-  overflow: visible;
+  overflow: hidden;
+  border: 1px solid rgba(163, 139, 91, 0.22);
+  border-radius: var(--radius-lg);
   background:
-    radial-gradient(circle at 18% 0%, rgba(255, 231, 166, 0.34), transparent 34%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.2)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.68), rgba(255, 250, 240, 0.2)),
     rgba(255, 250, 240, calc(var(--paper-alpha) * 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.markdown-find-panel {
+  position: absolute;
+  top: 58px;
+  right: 16px;
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  max-width: min(680px, calc(100% - 32px));
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(163, 139, 91, 0.24);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.98), rgba(255, 249, 232, 0.92)),
+    var(--surface);
+  box-shadow: 0 18px 48px rgba(45, 38, 24, 0.16);
+  padding: 7px;
+}
+
+.markdown-find-field {
+  display: inline-flex;
+  height: 32px;
+  min-width: 130px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(163, 139, 91, 0.2);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text-muted);
+  padding: 0 8px;
+}
+
+.markdown-find-field input {
+  width: 118px;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-main);
+  font-size: 13px;
+}
+
+.markdown-find-count {
+  min-width: 42px;
+  color: var(--text-muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.markdown-find-icon,
+.markdown-find-text,
+.markdown-find-case {
+  display: inline-flex;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid rgba(163, 139, 91, 0.18);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.52);
+  color: var(--text-main);
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+.markdown-find-icon {
+  width: 30px;
+  padding: 0;
+}
+
+.markdown-find-icon:hover,
+.markdown-find-text:hover,
+.markdown-find-case:hover {
+  background: var(--surface-selected);
+  color: var(--accent);
+}
+
+.markdown-find-case input {
+  accent-color: var(--accent);
 }
 
 .vditor-markdown-editor,
@@ -2463,15 +2554,16 @@ textarea:focus,
 
 .vditor-markdown-editor-host {
   position: relative;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .vditor-markdown-editor {
-  overflow: visible;
+  overflow: hidden;
 }
 
 .vditor-markdown-editor .vditor {
   min-width: 0;
+  overflow: hidden;
   border: 0;
   background: transparent;
   color: var(--text-main);
@@ -2481,19 +2573,36 @@ textarea:focus,
 .vditor-markdown-editor .vditor-toolbar {
   position: relative;
   z-index: 10;
-  overflow: visible !important;
-  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  border-bottom: 1px solid rgba(163, 139, 91, 0.18);
   background:
-    linear-gradient(180deg, rgba(255, 245, 213, 0.96), rgba(255, 250, 240, 0.82)),
+    linear-gradient(180deg, rgba(255, 246, 218, 0.98), rgba(255, 250, 240, 0.9)),
     rgba(255, 250, 240, calc(var(--paper-alpha) * 0.96));
-  padding: 9px 12px;
   border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;
+  padding: 8px 10px;
+  scrollbar-width: thin;
   --toolbar-icon-color: rgba(43, 45, 48, 0.82);
   --toolbar-icon-hover-color: var(--accent);
 }
 
 .vditor-markdown-editor .vditor-toolbar__item {
   position: relative;
+}
+
+.vditor-markdown-editor .vditor-toolbar__item button {
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.vditor-markdown-editor .vditor-toolbar__item button:hover {
+  background: var(--surface-selected);
+  color: var(--accent);
+  transform: translateY(-1px);
 }
 
 .vditor-markdown-editor .vditor-toolbar__item[data-floatnote-tip]:hover::after,
@@ -2527,21 +2636,6 @@ textarea:focus,
   border: 5px solid transparent;
   border-bottom-color: rgba(36, 39, 43, 0.94);
   content: "";
-}
-
-.vditor-markdown-editor .vditor-toolbar__item button {
-  border-radius: var(--radius-sm);
-  color: var(--text-main);
-  transition:
-    background 0.16s ease,
-    color 0.16s ease,
-    transform 0.16s ease;
-}
-
-.vditor-markdown-editor .vditor-toolbar__item button:hover {
-  background: var(--surface-selected);
-  color: var(--accent);
-  transform: translateY(-1px);
 }
 
 .vditor-markdown-editor .vditor-tooltipped::after {
@@ -2595,14 +2689,16 @@ textarea:focus,
 }
 
 .vditor-markdown-editor .vditor-ir,
-.vditor-markdown-editor .vditor-wysiwyg {
+.vditor-markdown-editor .vditor-wysiwyg,
+.vditor-markdown-editor .vditor-sv {
   min-width: 0;
   background: transparent;
 }
 
 .vditor-markdown-editor .vditor-ir pre.vditor-reset,
-.vditor-markdown-editor .vditor-wysiwyg pre.vditor-reset {
-  padding: 28px 38px 56px !important;
+.vditor-markdown-editor .vditor-wysiwyg pre.vditor-reset,
+.vditor-markdown-editor .vditor-sv .vditor-reset {
+  padding: 30px 42px 60px !important;
   color: var(--text-main);
   font-family: var(--font-ui);
   font-size: 16px;
@@ -2644,108 +2740,44 @@ textarea:focus,
 }
 
 .vditor-markdown-editor .vditor-reset em {
-  color: #183f74;
-  font-family: var(--font-title);
+  color: #254b7f;
   font-style: italic;
 }
 
-.markdown-outline-panel-vditor {
-  grid-row: 1;
-  z-index: 2;
-  display: grid;
-  min-width: 0;
-  max-height: 94px;
-  align-content: start;
-  gap: 10px;
-  overflow: hidden;
-  padding: 10px 12px;
+.vditor-markdown-editor .vditor-outline {
+  width: 210px;
+  border-right: 1px solid rgba(163, 139, 91, 0.16);
   background:
-    linear-gradient(180deg, rgba(255, 252, 244, 0.76), rgba(255, 245, 221, 0.44)),
-    rgba(255, 250, 240, calc(var(--paper-alpha) * 0.82));
+    linear-gradient(180deg, rgba(255, 253, 247, 0.7), rgba(255, 249, 232, 0.32)),
+    rgba(255, 250, 240, calc(var(--paper-alpha) * 0.78));
+  color: var(--text-muted);
 }
 
-.markdown-outline-panel-vditor header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 8px;
-}
-
-.markdown-outline-panel-vditor header span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.vditor-markdown-editor .vditor-outline__title {
+  border-bottom: 1px dashed rgba(163, 139, 91, 0.22);
   color: var(--text-main);
   font-family: var(--font-title);
-  font-size: 15px;
   font-weight: 700;
 }
 
-.markdown-outline-panel-vditor small,
-.markdown-outline-empty-vditor {
-  color: var(--text-muted);
-  font-size: 12px;
+.vditor-markdown-editor .vditor-outline li > span {
+  border-radius: var(--radius-xs);
+  padding: 4px 8px;
 }
 
-.markdown-outline-list-vditor {
-  display: flex;
-  gap: 6px;
-  overflow: auto;
-  max-height: 100%;
-  padding-right: 2px;
-  padding-bottom: 2px;
-}
-
-.markdown-outline-item-vditor {
-  display: inline-grid;
-  min-width: 112px;
-  max-width: 190px;
-  grid-template-columns: 24px minmax(0, 1fr);
-  align-items: center;
-  gap: 7px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  color: var(--text-main);
-  padding: 7px 8px;
-  text-align: left;
-  transition:
-    border-color 0.16s ease,
-    background 0.16s ease,
-    color 0.16s ease,
-    transform 0.16s ease;
-}
-
-.markdown-outline-item-vditor:hover {
-  border-color: rgba(80, 117, 103, 0.22);
+.vditor-markdown-editor .vditor-outline li > span:hover {
   background: var(--surface-selected);
   color: var(--accent);
-  transform: translateX(1px);
 }
 
-.markdown-outline-item-vditor em {
-  color: var(--text-subtle);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-style: normal;
-}
-
-.markdown-outline-item-vditor span {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.markdown-outline-item-vditor.level-2 {
-  border-left: 3px solid rgba(109, 143, 191, 0.38);
-}
-
-.markdown-outline-item-vditor.level-3,
-.markdown-outline-item-vditor.level-4 {
-  border-left: 3px solid rgba(124, 92, 200, 0.28);
-  font-size: 13px;
+.vditor-markdown-editor .vditor-counter {
+  right: 12px;
+  bottom: 8px;
+  border-radius: 999px;
+  background: rgba(255, 250, 240, 0.78);
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 2px 8px;
 }
 
 @media (max-width: 980px) {
@@ -2753,11 +2785,7 @@ textarea:focus,
     grid-template-columns: 1fr;
   }
 
-  .markdown-studio-layout-vditor.is-outline-open {
-    grid-template-columns: 1fr;
-  }
-
-  .markdown-editor-workspace.is-outline-open {
+  .markdown-studio-layout-vditor {
     grid-template-columns: 1fr;
   }
 
@@ -2765,10 +2793,13 @@ textarea:focus,
     max-height: 220px;
   }
 
-  .markdown-outline-panel-vditor {
+  .markdown-find-panel {
     position: static;
-    width: auto;
-    max-height: 220px;
+    max-width: 100%;
+  }
+
+  .vditor-markdown-editor .vditor-outline {
+    width: 168px;
   }
 }
 
