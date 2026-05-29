@@ -14,7 +14,6 @@ export interface VditorMarkdownEditorHandle {
 
 interface VditorMarkdownEditorProps {
   value: string;
-  compact?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
   onChange: (value: string) => void;
@@ -152,9 +151,10 @@ const installToolbarTooltips = (host: HTMLElement) => {
 };
 
 export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, VditorMarkdownEditorProps>(
-  ({ value, compact = false, placeholder = "记下一点灵感，随笔或 Markdown 片段", autoFocus = false, onChange, onSaveShortcut }, ref) => {
+  ({ value, placeholder = "记下一点灵感，随笔或 Markdown 片段", autoFocus = false, onChange, onSaveShortcut }, ref) => {
     const hostRef = useRef<HTMLDivElement | null>(null);
     const editorRef = useRef<Vditor | null>(null);
+    const readyRef = useRef(false);
     const tooltipCleanupRef = useRef<(() => void) | null>(null);
     const valueRef = useRef(value);
     const onChangeRef = useRef(onChange);
@@ -165,13 +165,13 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
 
     useImperativeHandle(ref, () => ({
       focus: () => editorRef.current?.focus(),
-      getValue: () => editorRef.current?.getValue() ?? valueRef.current,
+      getValue: () => (readyRef.current ? (editorRef.current?.getValue() ?? valueRef.current) : valueRef.current),
       insertValue: (nextValue: string, render = true) => {
-        editorRef.current?.insertValue(nextValue, render);
+        if (readyRef.current) editorRef.current?.insertValue(nextValue, render);
       },
       replaceValue: (nextValue: string) => {
         valueRef.current = nextValue;
-        editorRef.current?.setValue(nextValue, true);
+        if (readyRef.current) editorRef.current?.setValue(nextValue, true);
         onChangeRef.current(nextValue);
       },
       scrollToHeading: (index: number) => {
@@ -181,7 +181,7 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
       },
       setValue: (nextValue: string) => {
         valueRef.current = nextValue;
-        editorRef.current?.setValue(nextValue, true);
+        if (readyRef.current) editorRef.current?.setValue(nextValue, true);
       },
     }));
 
@@ -202,20 +202,21 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
             hostRef.current,
             buildVditorOptions({
               cdn: VDITOR_CDN,
-              compact,
               placeholder,
               value: valueRef.current,
               onInput: (markdown: string) => {
-              valueRef.current = markdown;
-              onChangeRef.current(markdown);
-            },
+                valueRef.current = markdown;
+                onChangeRef.current(markdown);
+              },
               onReady: () => {
-              editor.setValue(valueRef.current, true);
-              editor.disabledCache();
-              tooltipCleanupRef.current?.();
-              tooltipCleanupRef.current = installToolbarTooltips(host);
-              if (autoFocus) window.setTimeout(() => editor.focus(), 0);
-            },
+                if (disposed) return;
+                readyRef.current = true;
+                editor.setValue(valueRef.current, true);
+                editor.disabledCache();
+                tooltipCleanupRef.current?.();
+                tooltipCleanupRef.current = installToolbarTooltips(host);
+                if (autoFocus) window.setTimeout(() => editor.focus(), 0);
+              },
             }),
           );
 
@@ -224,16 +225,26 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
 
       return () => {
         disposed = true;
+        readyRef.current = false;
         tooltipCleanupRef.current?.();
         tooltipCleanupRef.current = null;
-        editorRef.current?.destroy();
+        try {
+          editorRef.current?.destroy();
+        } catch (error) {
+          console.warn("Vditor destroy skipped before ready", error);
+        }
         editorRef.current = null;
       };
-    }, [autoFocus, compact, placeholder]);
+    }, []);
 
     useEffect(() => {
       const editor = editorRef.current;
-      if (!editor || value === valueRef.current || value === editor.getValue()) {
+      if (!editor || !readyRef.current) {
+        valueRef.current = value;
+        return;
+      }
+
+      if (value === valueRef.current || value === editor.getValue()) {
         valueRef.current = value;
         return;
       }
@@ -244,12 +255,7 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
 
     return (
       <div
-        data-quick-note-input={compact ? true : undefined}
-        className={`vditor-markdown-editor ${compact ? "is-compact" : ""}`}
-        tabIndex={compact ? 0 : undefined}
-        onFocus={() => {
-          if (compact) editorRef.current?.focus();
-        }}
+        className="vditor-markdown-editor"
         onKeyDown={(event) => {
           if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
             event.preventDefault();

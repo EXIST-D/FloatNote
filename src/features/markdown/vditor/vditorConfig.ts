@@ -2,7 +2,6 @@ export type MarkdownToolbarItem = string | IMenuItem;
 
 type BuildVditorOptionsArgs = {
   cdn: string;
-  compact?: boolean;
   placeholder: string;
   value: string;
   onInput: (value: string) => void;
@@ -95,7 +94,6 @@ export const markdownToolbar: MarkdownToolbarItem[] = [
 
 export function buildVditorOptions({
   cdn,
-  compact = false,
   placeholder,
   value,
   onInput,
@@ -104,7 +102,7 @@ export function buildVditorOptions({
   return {
     cache: { enable: false },
     cdn,
-    counter: { enable: !compact },
+    counter: { enable: true },
     height: "100%",
     hint: {
       delay: 500,
@@ -112,10 +110,10 @@ export function buildVditorOptions({
     },
     icon: "ant",
     lang: "zh_CN",
-    minHeight: compact ? 180 : 520,
+    minHeight: 520,
     mode: "ir",
     outline: {
-      enable: !compact,
+      enable: true,
       position: "left",
     },
     placeholder,
@@ -147,8 +145,8 @@ export function buildVditorOptions({
     },
     tab: "\t",
     theme: "classic",
-    toolbar: compact ? [] : markdownToolbar,
-    toolbarConfig: { pin: !compact },
+    toolbar: markdownToolbar,
+    toolbarConfig: { pin: true },
     value,
     width: "100%",
     after: onReady,

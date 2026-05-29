@@ -1,12 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Toast } from "../../components/common/Toast";
 import { PanelBody } from "../../components/layout/PanelBody";
-import { VditorMarkdownEditor, type VditorMarkdownEditorHandle } from "../markdown/vditor/VditorMarkdownEditor";
 import { useNotes } from "./useNotes";
 
 export function FloatingNotesView() {
   const { error, addNote } = useNotes();
-  const editorRef = useRef<VditorMarkdownEditorHandle | null>(null);
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -18,7 +16,7 @@ export function FloatingNotesView() {
   }, [feedback]);
 
   async function saveNote() {
-    const nextContent = (editorRef.current?.getValue() ?? content).trim();
+    const nextContent = content.trim();
     if (!nextContent || saving) {
       if (!nextContent) setFeedback("先写一点内容");
       return;
@@ -28,7 +26,6 @@ export function FloatingNotesView() {
     try {
       await addNote(nextContent);
       setContent("");
-      editorRef.current?.setValue("");
       setFeedback("已收进灵感");
     } finally {
       setSaving(false);
@@ -38,14 +35,18 @@ export function FloatingNotesView() {
   return (
     <PanelBody className="floating-notes-view">
       <section className="floating-markdown-box">
-        <VditorMarkdownEditor
-          ref={editorRef}
-          compact
+        <textarea
+          data-quick-note-input
+          className="floating-markdown-textarea"
           value={content}
           placeholder="记下一点灵感、随笔或 Markdown 片段"
-          autoFocus
-          onChange={setContent}
-          onSaveShortcut={() => void saveNote()}
+          onChange={(event) => setContent(event.currentTarget.value)}
+          onKeyDown={(event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+              event.preventDefault();
+              void saveNote();
+            }
+          }}
         />
       </section>
       <button
