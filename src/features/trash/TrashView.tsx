@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
 import { Toast } from "../../components/common/Toast";
+import { DashboardPage } from "../../components/layout/DashboardPage";
 import { clearTrashItems, deleteTrashItem, listTrashItems, restoreTrashItem } from "../../data/trashRepository";
 import type { TrashItem } from "../../types/domain";
 
@@ -70,16 +71,18 @@ export function TrashView() {
   if (loading) return <main className="dashboard-page dashboard-centered">正在读取回收站...</main>;
 
   return (
-    <main className="dashboard-page">
-      <div className="dashboard-page-title">
-        <p>误删恢复</p>
-        <h1>回收站</h1>
-        {items.length > 0 && (
+    <DashboardPage
+      eyebrow="误删恢复"
+      title="回收站"
+      description={`${items.length} 条可恢复记录`}
+      actions={
+        items.length > 0 && (
           <button type="button" className="secondary-action" onClick={() => void clearAll()}>
             清空
           </button>
-        )}
-      </div>
+        )
+      }
+    >
       {items.length === 0 ? (
         <EmptyState title="回收站是空的" />
       ) : (
@@ -103,6 +106,6 @@ export function TrashView() {
         </section>
       )}
       <Toast message={feedback} />
-    </main>
+    </DashboardPage>
   );
 }

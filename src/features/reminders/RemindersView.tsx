@@ -1,6 +1,7 @@
 import { Bell, Trash2 } from "lucide-react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { IconButton } from "../../components/common/IconButton";
+import { DashboardPage } from "../../components/layout/DashboardPage";
 import { useReminders } from "./useReminders";
 
 const statusLabel = {
@@ -13,13 +14,10 @@ export function RemindersView() {
   const { reminders, loading, dismiss, remove } = useReminders();
 
   if (loading) return <main className="dashboard-page dashboard-centered">正在读取提醒...</main>;
+  const pendingCount = reminders.filter((reminder) => reminder.status === "pending").length;
 
   return (
-    <main className="dashboard-page">
-      <div className="dashboard-page-title">
-        <p>应用运行期间生效</p>
-        <h1>提醒总览</h1>
-      </div>
+    <DashboardPage eyebrow="应用运行期间生效" title="提醒总览" description={`${pendingCount} 条待提醒，提醒会通过系统通知送达`}>
       {reminders.length === 0 ? (
         <EmptyState title="还没有任务提醒" />
       ) : (
@@ -41,6 +39,6 @@ export function RemindersView() {
           ))}
         </section>
       )}
-    </main>
+    </DashboardPage>
   );
 }

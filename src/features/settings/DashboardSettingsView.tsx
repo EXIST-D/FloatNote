@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { ClipboardList, Download, Droplets, Image, Palette, RotateCcw, Tags, Type } from "lucide-react";
+import { DashboardPage } from "../../components/layout/DashboardPage";
 import { buildExportSnapshot, exportSnapshotAsJson, exportSnapshotAsMarkdown } from "../../data/exportRepository";
 import {
   DEFAULT_DASHBOARD_BACKGROUND,
@@ -147,14 +148,22 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
   }
 
   return (
-    <main className="dashboard-page settings-page">
-      <div className="dashboard-page-title">
-        <p>外观实验室</p>
-        <h1>把浮笺调成顺手的样子</h1>
-      </div>
-      <section className="settings-grid">
+    <DashboardPage
+      className="settings-page"
+      eyebrow="设置中心"
+      title="设置"
+      description="外观、行为、标签和数据管理集中在这里"
+    >
+      <div className="settings-layout">
+        <aside className="settings-side-nav" aria-label="设置分组">
+          <a href="#settings-appearance">外观</a>
+          <a href="#settings-behavior">行为</a>
+          <a href="#settings-data">数据</a>
+          <a href="#settings-labels">标签</a>
+        </aside>
+        <section className="settings-grid">
         <article className="settings-card settings-card-wide background-settings-card">
-          <h2>
+          <h2 id="settings-appearance">
             <Image size={18} /> 主窗口背景
           </h2>
           <div className="dashboard-background-config">
@@ -266,7 +275,7 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
         </article>
 
         <article className="settings-card">
-          <h2>
+          <h2 id="settings-behavior">
             <ClipboardList size={18} /> 复盘方式
           </h2>
           <div className="settings-options">
@@ -357,7 +366,7 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
         </article>
 
         <article className="settings-card settings-card-wide">
-          <h2>
+          <h2 id="settings-data">
             <Download size={18} /> 导出数据
           </h2>
           <div className="settings-actions">
@@ -371,7 +380,7 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
         </article>
 
         <article className="settings-card settings-card-wide">
-          <h2>
+          <h2 id="settings-labels">
             <Tags size={18} /> 任务等级标签
           </h2>
           {taskLabels.error && <p className="settings-error">{taskLabels.error}</p>}
@@ -392,7 +401,8 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
             </button>
           </div>
         </article>
-      </section>
-    </main>
+        </section>
+      </div>
+    </DashboardPage>
   );
 }

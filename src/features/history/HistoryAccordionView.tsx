@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
+import { DashboardPage } from "../../components/layout/DashboardPage";
 import { formatDuration } from "../../lib/time";
 import { formatFocusHistorySummary, formatHistoryDateLabel } from "./historyFormat";
 import { summarizeHistoryDay } from "./historySummary";
@@ -14,11 +15,7 @@ export function HistoryAccordionView() {
   if (groups.length === 0) return <main className="dashboard-page"><EmptyState title="还没有历史记录" /></main>;
 
   return (
-    <main className="dashboard-page">
-      <div className="dashboard-page-title">
-        <p>按天归档</p>
-        <h1>历史</h1>
-      </div>
+    <DashboardPage eyebrow="按天归档" title="历史" description={`${groups.length} 个日期分组，点击某天查看复盘、任务、灵感和专注`}>
       <section className="history-accordion">
         {groups.map((group) => {
           const summary = summarizeHistoryDay(group);
@@ -101,6 +98,6 @@ export function HistoryAccordionView() {
           );
         })}
       </section>
-    </main>
+    </DashboardPage>
   );
 }

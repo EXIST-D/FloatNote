@@ -1,5 +1,6 @@
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { DashboardPage } from "../../components/layout/DashboardPage";
 import { searchAll } from "../../data/searchRepository";
 import type { DashboardTab, SearchResult } from "../../types/domain";
 
@@ -60,11 +61,7 @@ export function SearchView({ onNavigate }: SearchViewProps) {
   }
 
   return (
-    <main className="dashboard-page">
-      <div className="dashboard-page-title">
-        <p>全局检索</p>
-        <h1>搜索浮笺中的任务、灵感和历史</h1>
-      </div>
+    <DashboardPage eyebrow="全局检索" title="搜索" description="查找今日、本周、灵感、历史和专注摘要">
       <label className="search-box">
         <Search size={18} />
         <input
@@ -96,6 +93,6 @@ export function SearchView({ onNavigate }: SearchViewProps) {
             </section>
           ))}
       </section>
-    </main>
+    </DashboardPage>
   );
 }

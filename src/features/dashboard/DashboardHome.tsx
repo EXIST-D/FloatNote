@@ -1,5 +1,6 @@
-import { ArrowRight, Clock3, Image, Lightbulb, ListTodo, NotebookTabs } from "lucide-react";
+import { ArrowRight, Clock3, History, Lightbulb, ListTodo, NotebookTabs, Plus } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
+import { DashboardPage } from "../../components/layout/DashboardPage";
 import { formatDuration } from "../../lib/time";
 import type { DashboardTab } from "../../types/domain";
 import { formatFocusHistorySummary } from "../history/historyFormat";
@@ -77,6 +78,7 @@ export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
 
   const activeToday = summary.todayTasks.filter((task) => task.status === "active").length;
   const activeWeek = summary.weekTasks.filter((task) => task.status === "active").length;
+  const doneToday = summary.todayTasks.filter((task) => task.status === "done").length;
   const recentHistory = groups.slice(0, 4);
   const recentHistoryText =
     recentHistory.length > 0
@@ -90,22 +92,43 @@ export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
       : "暂无历史记录";
 
   return (
-    <main className="dashboard-page">
-      <section className="dashboard-hero">
+    <DashboardPage
+      className="dashboard-home-page"
+      eyebrow={heroCopy.kicker}
+      title="静白工作台"
+      description={heroCopy.title}
+      actions={
+        <>
+          <button type="button" className="secondary-action" onClick={() => onNavigate("notes")}>
+            <Plus size={15} />
+            新灵感
+          </button>
+          <button type="button" className="primary-action" onClick={() => onNavigate("today")}>
+            进入今日
+          </button>
+        </>
+      }
+    >
+      <section className="today-strip" aria-label="今日速览">
         <div>
-          <p>{heroCopy.kicker}</p>
-          <h1>{heroCopy.title}</h1>
-          <div className="dashboard-hero-actions">
-            <button type="button" onClick={() => onNavigate("settings")}>
-              <Image size={15} />
-              调整背景
-            </button>
-          </div>
+          <span>今日待处理</span>
+          <strong>{activeToday}</strong>
+          <small>已完成 {doneToday}</small>
         </div>
-        <div className="dashboard-hero-metric">
+        <div>
+          <span>本周待处理</span>
+          <strong>{activeWeek}</strong>
+          <small>组会/汇报事项</small>
+        </div>
+        <div>
           <span>今日专注</span>
           <strong>{formatDuration(summary.todayFocusSeconds)}</strong>
+          <small>{summary.focusSessions.length} 条记录</small>
         </div>
+        <button type="button" onClick={() => onNavigate("search")}>
+          搜索全部记录
+          <ArrowRight size={15} />
+        </button>
       </section>
 
       <section className="dashboard-work-grid" aria-label="工作台速览">
@@ -154,10 +177,11 @@ export function DashboardHome({ onNavigate, heroCopy }: DashboardHomeProps) {
       {reviewActions.error && <p className="review-error">{reviewActions.error}</p>}
 
       <button type="button" className="dashboard-history-strip" onClick={() => onNavigate("history")}>
+        <History size={16} />
         <span>最近历史</span>
         <strong>{recentHistoryText}</strong>
         <ArrowRight size={16} />
       </button>
-    </main>
+    </DashboardPage>
   );
 }
