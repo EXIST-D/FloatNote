@@ -3,8 +3,8 @@ import { ClipboardList, Download, Image, Palette, Pin, RotateCcw, Tags } from "l
 import type { ReactNode } from "react";
 import { DashboardPage } from "../../components/layout/DashboardPage";
 import { buildExportSnapshot, exportSnapshotAsJson, exportSnapshotAsMarkdown } from "../../data/exportRepository";
-import { DEFAULT_DASHBOARD_HERO_KICKER, DEFAULT_DASHBOARD_HERO_TITLE } from "../../data/settingsRepository";
-import type { DashboardAppearanceSetting, FontFamilyName, ReviewMode, TaskLabel } from "../../types/domain";
+import { DEFAULT_DASHBOARD_HERO_KICKER, DEFAULT_DASHBOARD_HERO_TITLE, DEFAULT_FLOATING_APPEARANCE } from "../../data/settingsRepository";
+import type { DashboardAppearanceSetting, FloatingAppearanceSetting, FontFamilyName, ReviewMode, TaskLabel } from "../../types/domain";
 import { useTaskLabels } from "../tasks/useTaskLabels";
 import type { useSettings } from "./useSettings";
 
@@ -20,6 +20,8 @@ const backgroundFits: Array<{ id: DashboardAppearanceSetting["backgroundFit"]; l
   { id: "contain", label: "完整显示" },
   { id: "repeat", label: "平铺" },
 ];
+
+const floatingBackgroundFits: Array<{ id: FloatingAppearanceSetting["backgroundFit"]; label: string }> = backgroundFits;
 
 const fontFamilies: Array<{ id: FontFamilyName; label: string; sample: string }> = [
   { id: "yahei", label: "微软雅黑", sample: "清晰现代" },
@@ -165,6 +167,24 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
     reader.readAsDataURL(file);
   }
 
+  function handleFloatingBackgroundFile(file: File | null) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      window.alert("请选择图片文件");
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      window.alert("图片请控制在 3MB 以内");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== "string") return;
+      void settings.setFloatingAppearance({ backgroundImageDataUrl: reader.result });
+    };
+    reader.readAsDataURL(file);
+  }
+
   return (
     <DashboardPage
       className="settings-page settings-page-quiet"
@@ -260,6 +280,56 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
                 <span>{formatPercent(settings.floatingOpacity)}</span>
               </label>
             </SettingsRow>
+            <SettingsRow title="浮笺底色" description="设置桌面浮笺的纸面基础颜色">
+              <label className="settings-color-control">
+                <span style={{ background: settings.floatingAppearance.baseColor }} />
+                <input
+                  aria-label="浮笺底色"
+                  type="color"
+                  value={settings.floatingAppearance.baseColor}
+                  onChange={(event) => void settings.setFloatingAppearance({ baseColor: event.currentTarget.value })}
+                />
+                <em>{settings.floatingAppearance.baseColor.toUpperCase()}</em>
+              </label>
+            </SettingsRow>
+            <SettingsRow title="浮笺强调色" description="影响浮窗标签、按钮和焦点状态">
+              <label className="settings-color-control">
+                <span style={{ background: settings.floatingAppearance.accentColor }} />
+                <input
+                  aria-label="浮笺强调色"
+                  type="color"
+                  value={settings.floatingAppearance.accentColor}
+                  onChange={(event) => void settings.setFloatingAppearance({ accentColor: event.currentTarget.value })}
+                />
+                <em>{settings.floatingAppearance.accentColor.toUpperCase()}</em>
+              </label>
+            </SettingsRow>
+            <SettingsRow title="浮笺背景图片" description="选择一张本地图片作为桌面浮笺背景">
+              <div className="settings-inline-actions">
+                <label className="settings-file-button">
+                  <Image size={14} />
+                  选择图片
+                  <input type="file" accept="image/*" onChange={(event) => handleFloatingBackgroundFile(event.currentTarget.files?.[0] ?? null)} />
+                </label>
+                <button type="button" onClick={() => void settings.setFloatingAppearance({ backgroundImageDataUrl: null })}>
+                  清除图片
+                </button>
+              </div>
+            </SettingsRow>
+            <SettingsRow title="浮笺图片适配" description="控制浮笺背景图片的填充方式">
+              <select
+                value={settings.floatingAppearance.backgroundFit}
+                onChange={(event) =>
+                  void settings.setFloatingAppearance({ backgroundFit: event.currentTarget.value as FloatingAppearanceSetting["backgroundFit"] })
+                }
+              >
+                {floatingBackgroundFits.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </SettingsRow>
             <SettingsRow title="中文字体" description="影响主窗口、浮笺、任务和输入内容">
               <select
                 value={settings.fontFamily}
@@ -273,7 +343,15 @@ export function DashboardSettingsView({ settings }: DashboardSettingsViewProps) 
               </select>
             </SettingsRow>
             <SettingsRow title="恢复默认外观" description="恢复主窗口颜色、透明度和背景图片">
-              <button type="button" className="secondary-action" onClick={() => void settings.resetDashboardAppearance()}>
+              <button
+                type="button"
+                className="secondary-action"
+                onClick={() => {
+                  void settings.resetDashboardAppearance();
+                  void settings.setFloatingAppearance(DEFAULT_FLOATING_APPEARANCE);
+                  void settings.setFloatingOpacity(1);
+                }}
+              >
                 <RotateCcw size={14} />
                 恢复默认
               </button>

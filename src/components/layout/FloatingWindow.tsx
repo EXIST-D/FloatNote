@@ -1,6 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { LayoutDashboard, Minus, Pin, Settings, X } from "lucide-react";
-import type { MouseEvent, ReactNode } from "react";
+import type { CSSProperties, MouseEvent, ReactNode } from "react";
 import { useState } from "react";
 import { openDashboardWindow } from "../../features/dashboard/useDashboardWindow";
 import { IconButton } from "../common/IconButton";
@@ -11,6 +11,7 @@ interface FloatingWindowProps {
   alwaysOnTop: boolean;
   onAlwaysOnTopChange: (value: boolean) => void;
   toastMessage?: string | null;
+  style?: CSSProperties;
 }
 
 export function FloatingWindow({
@@ -18,6 +19,7 @@ export function FloatingWindow({
   alwaysOnTop,
   onAlwaysOnTopChange,
   toastMessage = null,
+  style,
 }: FloatingWindowProps) {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -28,7 +30,11 @@ export function FloatingWindow({
 
   return (
     <main className="h-screen w-screen overflow-hidden bg-transparent p-0">
-      <section className="note-shell relative flex h-full w-full flex-col overflow-hidden text-[var(--text-main)]" data-collapsed={collapsed}>
+      <section
+        className="note-shell relative flex h-full w-full flex-col overflow-hidden text-[var(--text-main)]"
+        data-collapsed={collapsed}
+        style={style}
+      >
         <header
           data-tauri-drag-region
           className="note-titlebar flex h-10 shrink-0 items-center justify-between px-3"

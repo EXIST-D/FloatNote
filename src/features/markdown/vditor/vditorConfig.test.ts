@@ -80,4 +80,22 @@ describe("vditorConfig", () => {
     expect(options.preview?.math).toEqual({ engine: "KaTeX" });
     expect(options.preview?.hljs).toEqual(expect.objectContaining({ enable: true, lineNumber: true }));
   });
+
+  it("builds compact Vditor options for the floating note editor", () => {
+    const options = buildVditorOptions({
+      cdn: "/vendor/vditor",
+      placeholder: "随手记一点",
+      value: "",
+      compact: true,
+      onInput: () => undefined,
+      onReady: () => undefined,
+    });
+
+    expect(options.mode).toBe("ir");
+    expect(options.toolbar).toEqual([]);
+    expect(options.outline).toEqual({ enable: false, position: "left" });
+    expect(options.counter).toEqual({ enable: false });
+    expect(options.minHeight).toBe(180);
+    expect(options.toolbarConfig).toEqual({ pin: false });
+  });
 });

@@ -151,3 +151,10 @@ export interface DashboardAppearanceSetting {
   backgroundImageDataUrl: string | null;
   backgroundFit: "cover" | "contain" | "repeat";
 }
+
+export interface FloatingAppearanceSetting {
+  baseColor: string;
+  accentColor: string;
+  backgroundImageDataUrl: string | null;
+  backgroundFit: "cover" | "contain" | "repeat";
+}

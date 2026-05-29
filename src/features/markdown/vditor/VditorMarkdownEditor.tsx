@@ -14,6 +14,7 @@ export interface VditorMarkdownEditorHandle {
 
 interface VditorMarkdownEditorProps {
   value: string;
+  compact?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
   onChange: (value: string) => void;
@@ -151,7 +152,7 @@ const installToolbarTooltips = (host: HTMLElement) => {
 };
 
 export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, VditorMarkdownEditorProps>(
-  ({ value, placeholder = "记下一点灵感，随笔或 Markdown 片段", autoFocus = false, onChange, onSaveShortcut }, ref) => {
+  ({ value, compact = false, placeholder = "记下一点灵感，随笔或 Markdown 片段", autoFocus = false, onChange, onSaveShortcut }, ref) => {
     const hostRef = useRef<HTMLDivElement | null>(null);
     const editorRef = useRef<Vditor | null>(null);
     const tooltipCleanupRef = useRef<(() => void) | null>(null);
@@ -201,6 +202,7 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
             hostRef.current,
             buildVditorOptions({
               cdn: VDITOR_CDN,
+              compact,
               placeholder,
               value: valueRef.current,
               onInput: (markdown: string) => {
@@ -227,7 +229,7 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
         editorRef.current?.destroy();
         editorRef.current = null;
       };
-    }, []);
+    }, [autoFocus, compact, placeholder]);
 
     useEffect(() => {
       const editor = editorRef.current;
@@ -242,7 +244,12 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
 
     return (
       <div
-        className="vditor-markdown-editor"
+        data-quick-note-input={compact ? true : undefined}
+        className={`vditor-markdown-editor ${compact ? "is-compact" : ""}`}
+        tabIndex={compact ? 0 : undefined}
+        onFocus={() => {
+          if (compact) editorRef.current?.focus();
+        }}
         onKeyDown={(event) => {
           if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
             event.preventDefault();

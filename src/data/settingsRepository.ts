@@ -3,6 +3,7 @@ import type {
   DashboardAppearanceSetting,
   DashboardBackgroundPreset,
   DashboardBackgroundSetting,
+  FloatingAppearanceSetting,
   FontFamilyName,
   MainWindowStyle,
   ReviewMode,
@@ -22,6 +23,12 @@ export const DEFAULT_DASHBOARD_APPEARANCE: DashboardAppearanceSetting = {
 };
 
 export const DEFAULT_FLOATING_OPACITY = 1;
+export const DEFAULT_FLOATING_APPEARANCE: FloatingAppearanceSetting = {
+  baseColor: "#fff8dc",
+  accentColor: "#7c5cc8",
+  backgroundImageDataUrl: null,
+  backgroundFit: "cover",
+};
 export const DEFAULT_FONT_FAMILY: FontFamilyName = "yahei";
 
 export interface WindowPositionSetting {
@@ -176,6 +183,10 @@ export function isDashboardBackgroundFit(value: string | null): value is Dashboa
   return value === "cover" || value === "contain" || value === "repeat";
 }
 
+export function isFloatingBackgroundFit(value: string | null): value is FloatingAppearanceSetting["backgroundFit"] {
+  return value === "cover" || value === "contain" || value === "repeat";
+}
+
 export function isFontFamilyName(value: string | null): value is FontFamilyName {
   return value === "yahei" || value === "songti" || value === "kaiti" || value === "fangsong";
 }
@@ -244,5 +255,33 @@ export async function setDashboardAppearance(setting: DashboardAppearanceSetting
     setSetting("dashboard_opacity", String(Math.min(Math.max(setting.opacity, 0), 1))),
     setSetting("dashboard_background_image", setting.backgroundImageDataUrl ?? ""),
     setSetting("dashboard_background_fit", isDashboardBackgroundFit(setting.backgroundFit) ? setting.backgroundFit : DEFAULT_DASHBOARD_APPEARANCE.backgroundFit),
+  ]);
+}
+
+export async function getFloatingAppearance() {
+  const [baseColor, accentColor, imageDataUrl, fit] = await Promise.all([
+    getSetting("floating_base_color"),
+    getSetting("floating_accent_color"),
+    getSetting("floating_background_image"),
+    getSetting("floating_background_fit"),
+  ]);
+
+  return {
+    baseColor: isHexColor(baseColor) ? baseColor : DEFAULT_FLOATING_APPEARANCE.baseColor,
+    accentColor: isHexColor(accentColor) ? accentColor : DEFAULT_FLOATING_APPEARANCE.accentColor,
+    backgroundImageDataUrl:
+      imageDataUrl === null
+        ? DEFAULT_FLOATING_APPEARANCE.backgroundImageDataUrl
+        : imageDataUrl || DEFAULT_FLOATING_APPEARANCE.backgroundImageDataUrl,
+    backgroundFit: isFloatingBackgroundFit(fit) ? fit : DEFAULT_FLOATING_APPEARANCE.backgroundFit,
+  };
+}
+
+export async function setFloatingAppearance(setting: FloatingAppearanceSetting) {
+  await Promise.all([
+    setSetting("floating_base_color", isHexColor(setting.baseColor) ? setting.baseColor : DEFAULT_FLOATING_APPEARANCE.baseColor),
+    setSetting("floating_accent_color", isHexColor(setting.accentColor) ? setting.accentColor : DEFAULT_FLOATING_APPEARANCE.accentColor),
+    setSetting("floating_background_image", setting.backgroundImageDataUrl ?? ""),
+    setSetting("floating_background_fit", isFloatingBackgroundFit(setting.backgroundFit) ? setting.backgroundFit : DEFAULT_FLOATING_APPEARANCE.backgroundFit),
   ]);
 }

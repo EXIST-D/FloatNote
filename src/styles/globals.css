@@ -17,6 +17,12 @@
   --note-line-height: 1.55;
   --paper-alpha: 1;
   --floating-opacity: 1;
+  --floating-base-color: #fff8dc;
+  --floating-accent-color: #7c5cc8;
+  --floating-bg-image: none;
+  --floating-bg-opacity: 0;
+  --floating-bg-size: cover;
+  --floating-bg-repeat: no-repeat;
   --dashboard-base-color: #f4f6f9;
   --dashboard-accent-color: #2563eb;
   --dashboard-opacity: 1;
@@ -3983,6 +3989,206 @@ textarea:focus,
   font-family: var(--font-ui);
   font-size: 12px;
   padding: 0 10px;
+}
+
+.note-shell {
+  --accent: var(--floating-accent-color);
+  --border-subtle: color-mix(in srgb, var(--floating-accent-color) 22%, transparent);
+  --border-strong: color-mix(in srgb, var(--floating-accent-color) 42%, transparent);
+  position: relative;
+  border-color: color-mix(in srgb, var(--floating-accent-color) 34%, var(--app-border));
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.42), rgb(255 255 255 / 0) 38%),
+    repeating-linear-gradient(0deg, transparent 0 23px, rgb(126 101 42 / 0.08) 24px),
+    var(--floating-base-color);
+  opacity: var(--floating-opacity);
+}
+
+.note-shell::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.2), transparent 48%),
+    var(--floating-bg-image);
+  background-position: center;
+  background-repeat: no-repeat, var(--floating-bg-repeat);
+  background-size: cover, var(--floating-bg-size);
+  content: "";
+  opacity: calc(0.2 + var(--floating-bg-opacity));
+  pointer-events: none;
+}
+
+.note-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.note-titlebar {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--floating-accent-color) 16%, transparent), transparent 60%),
+    color-mix(in srgb, var(--floating-base-color) 88%, white);
+}
+
+.note-bookmark {
+  background: linear-gradient(180deg, var(--floating-accent-color), color-mix(in srgb, var(--floating-accent-color) 52%, #d6a441));
+}
+
+.note-tabbar {
+  background: color-mix(in srgb, var(--floating-base-color) 84%, white);
+}
+
+.note-tab.is-active {
+  border-color: color-mix(in srgb, var(--floating-accent-color) 54%, transparent);
+  background: color-mix(in srgb, var(--floating-accent-color) 12%, white);
+  color: var(--floating-accent-color);
+}
+
+.note-shell .primary-action {
+  border-color: var(--floating-accent-color);
+  background: var(--floating-accent-color);
+  color: #ffffff;
+}
+
+.note-shell .secondary-action {
+  border-color: color-mix(in srgb, var(--floating-accent-color) 24%, var(--app-border));
+  background: rgb(255 255 255 / 0.42);
+  color: var(--text-main);
+}
+
+.note-shell .secondary-action:hover {
+  border-color: var(--floating-accent-color);
+  background: color-mix(in srgb, var(--floating-accent-color) 10%, white);
+  color: var(--floating-accent-color);
+}
+
+.panel-body.floating-task-view,
+.panel-body.floating-notes-view,
+.panel-body.floating-focus-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: transparent;
+  padding: 8px;
+}
+
+.floating-status-line {
+  margin: -2px 2px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.floating-list-panel {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.floating-empty,
+.floating-error {
+  margin: 0;
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  font-size: 12px;
+}
+
+.floating-empty {
+  color: var(--text-muted);
+}
+
+.floating-error {
+  background: rgb(255 231 225 / 0.7);
+  color: var(--danger);
+}
+
+.floating-markdown-box {
+  min-height: 180px;
+  flex: 1 1 auto;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--floating-accent-color) 24%, var(--app-border));
+  border-radius: var(--radius-md);
+  background: rgb(255 255 255 / 0.42);
+}
+
+.floating-note-save {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.vditor-markdown-editor.is-compact {
+  height: 100%;
+  min-height: 180px;
+  outline: 0;
+}
+
+.vditor-markdown-editor.is-compact .vditor {
+  height: 100% !important;
+  border: 0;
+  background: transparent;
+}
+
+.vditor-markdown-editor.is-compact .vditor-toolbar {
+  display: none;
+}
+
+.vditor-markdown-editor.is-compact .vditor-ir {
+  background: transparent;
+}
+
+.vditor-markdown-editor.is-compact .vditor-reset {
+  padding: 12px 13px !important;
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: var(--note-text-size);
+  line-height: var(--note-line-height);
+}
+
+.vditor-markdown-editor.is-compact .vditor-counter {
+  display: none;
+}
+
+.floating-focus-card {
+  display: grid;
+  min-height: 132px;
+  align-content: center;
+  gap: 4px;
+  border: 1px solid color-mix(in srgb, var(--floating-accent-color) 26%, transparent);
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--floating-accent-color) 18%, transparent), transparent),
+    color-mix(in srgb, var(--floating-accent-color) 10%, var(--floating-base-color));
+  padding: 18px;
+  color: var(--text-main);
+}
+
+.floating-focus-card span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.floating-focus-card strong {
+  color: var(--floating-accent-color);
+  font-size: clamp(34px, 12vw, 56px);
+  line-height: 1;
+}
+
+.floating-focus-card p {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.floating-focus-form,
+.floating-focus-actions {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.floating-focus-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .dashboard-empty {

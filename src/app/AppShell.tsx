@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { FloatingWindow } from "../components/layout/FloatingWindow";
 import { TabBar } from "../components/layout/TabBar";
 import { TimerStrip } from "../components/layout/TimerStrip";
-import { FocusView } from "../features/focus/FocusView";
+import { FloatingFocusView } from "../features/focus/FloatingFocusView";
 import { useFocusSession } from "../features/focus/useFocusSession";
 import { openDashboardWindow } from "../features/dashboard/useDashboardWindow";
-import { NotesView } from "../features/notes/NotesView";
+import { FloatingNotesView } from "../features/notes/FloatingNotesView";
 import { useSettings } from "../features/settings/useSettings";
 import { useGlobalShortcut } from "../features/shortcuts/useGlobalShortcut";
-import { TodayView } from "../features/today/TodayView";
-import { WeekView } from "../features/week/WeekView";
+import { FloatingTodayView } from "../features/today/FloatingTodayView";
+import { FloatingWeekView } from "../features/week/FloatingWeekView";
 import type { AppTab } from "../types/domain";
 
 export function AppShell() {
@@ -60,6 +60,7 @@ export function AppShell() {
       alwaysOnTop={settings.alwaysOnTop}
       onAlwaysOnTopChange={(value) => void settings.setAlwaysOnTop(value)}
       toastMessage={shortcutError}
+      style={settings.floatingAppearanceStyle}
     >
       <TabBar activeTab={activeTab} onChange={changeTab} />
       {focus.session && (
@@ -70,10 +71,10 @@ export function AppShell() {
           onClick={() => changeTab("focus")}
         />
       )}
-      {activeTab === "today" && <TodayView />}
-      {activeTab === "week" && <WeekView />}
-      {activeTab === "notes" && <NotesView />}
-      {activeTab === "focus" && <FocusView focus={focus} />}
+      {activeTab === "today" && <FloatingTodayView />}
+      {activeTab === "week" && <FloatingWeekView />}
+      {activeTab === "notes" && <FloatingNotesView />}
+      {activeTab === "focus" && <FloatingFocusView focus={focus} />}
     </FloatingWindow>
   );
 }

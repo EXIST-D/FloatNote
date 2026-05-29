@@ -5,10 +5,12 @@ import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   DEFAULT_DASHBOARD_APPEARANCE,
+  DEFAULT_FLOATING_APPEARANCE,
   DEFAULT_FLOATING_OPACITY,
   DEFAULT_FONT_FAMILY,
   getDashboardAppearance,
   getDashboardHeroCopy,
+  getFloatingAppearance,
   getFloatingOpacity,
   getFontFamily,
   getPriorityColors,
@@ -19,6 +21,7 @@ import {
   parseJsonSetting,
   setDashboardAppearance as saveDashboardAppearance,
   setDashboardHeroCopy as saveDashboardHeroCopy,
+  setFloatingAppearance as saveFloatingAppearance,
   setFloatingOpacity as saveFloatingOpacity,
   setFontFamily as saveFontFamily,
   setPriorityColors as savePriorityColors,
@@ -28,6 +31,7 @@ import {
 import type {
   AppTab,
   DashboardAppearanceSetting,
+  FloatingAppearanceSetting,
   FontFamilyName,
   ReviewMode,
   TaskPriority,
@@ -41,6 +45,7 @@ interface AppearancePayload {
   theme: ThemeName;
   fontFamily: FontFamilyName;
   floatingOpacity: number;
+  floatingAppearance: FloatingAppearanceSetting;
   priorityColors: Record<TaskPriority, string>;
 }
 
@@ -65,12 +70,15 @@ function applyAppearance(
   theme: ThemeName,
   fontFamily: FontFamilyName,
   floatingOpacity: number,
+  floatingAppearance: FloatingAppearanceSetting,
   priorityColors?: Record<TaskPriority, string>,
 ) {
   document.documentElement.dataset.theme = theme;
   document.documentElement.dataset.fontFamily = fontFamily;
   document.documentElement.style.setProperty("--floating-opacity", String(floatingOpacity));
   document.documentElement.style.setProperty("--paper-alpha", String(floatingOpacity));
+  document.documentElement.style.setProperty("--floating-base-color", floatingAppearance.baseColor);
+  document.documentElement.style.setProperty("--floating-accent-color", floatingAppearance.accentColor);
   if (priorityColors) {
     const vars = priorityColorsToCssVars(priorityColors);
     for (const [key, value] of Object.entries(vars)) {
@@ -88,6 +96,8 @@ function isAppearancePayload(value: unknown): value is AppearancePayload {
     typeof payload.floatingOpacity === "number" &&
     payload.floatingOpacity >= 0 &&
     payload.floatingOpacity <= 1 &&
+    typeof payload.floatingAppearance === "object" &&
+    payload.floatingAppearance !== null &&
     typeof payload.priorityColors === "object" &&
     payload.priorityColors !== null
   );
@@ -121,6 +131,8 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
   const [theme, setThemeState] = useState<ThemeName>("paper");
   const [fontFamily, setFontFamilyState] = useState<FontFamilyName>(DEFAULT_FONT_FAMILY);
   const [floatingOpacity, setFloatingOpacityState] = useState(DEFAULT_FLOATING_OPACITY);
+  const [floatingAppearance, setFloatingAppearanceState] =
+    useState<FloatingAppearanceSetting>(DEFAULT_FLOATING_APPEARANCE);
   const [dashboardAppearance, setDashboardAppearanceState] =
     useState<DashboardAppearanceSetting>(DEFAULT_DASHBOARD_APPEARANCE);
   const [reviewMode, setReviewModeState] = useState<ReviewMode>("manual_with_prompt");
@@ -142,6 +154,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
         savedTheme,
         savedFontFamily,
         savedFloatingOpacity,
+        savedFloatingAppearance,
         savedAlwaysOnTop,
         savedTab,
         savedPosition,
@@ -154,6 +167,7 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
         getSetting("theme"),
         getFontFamily(),
         getFloatingOpacity(),
+        getFloatingAppearance(),
         getSetting("always_on_top"),
         getSetting("last_active_tab"),
         getSetting("window_position"),
@@ -171,13 +185,14 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
       setThemeState(nextTheme);
       setFontFamilyState(savedFontFamily);
       setFloatingOpacityState(savedFloatingOpacity);
+      setFloatingAppearanceState(savedFloatingAppearance);
       setDashboardAppearanceState(savedDashboardAppearance);
       setReviewModeState(savedReviewMode);
       setDashboardHeroCopyState(savedHeroCopy);
       setPriorityColorsState(savedPriorityColors);
       setAlwaysOnTopState(nextAlwaysOnTop);
       setLastActiveTabState(nextTab);
-      applyAppearance(nextTheme, savedFontFamily, savedFloatingOpacity, savedPriorityColors);
+      applyAppearance(nextTheme, savedFontFamily, savedFloatingOpacity, savedFloatingAppearance, savedPriorityColors);
 
       if (manageFloatingWindow) {
         const appWindow = getCurrentWindow();
@@ -208,8 +223,9 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
       setThemeState(payload.theme);
       setFontFamilyState(payload.fontFamily);
       setFloatingOpacityState(payload.floatingOpacity);
+      setFloatingAppearanceState(payload.floatingAppearance);
       setPriorityColorsState(payload.priorityColors);
-      applyAppearance(payload.theme, payload.fontFamily, payload.floatingOpacity, payload.priorityColors);
+      applyAppearance(payload.theme, payload.fontFamily, payload.floatingOpacity, payload.floatingAppearance, payload.priorityColors);
     }).then((fn) => {
       unlisten = fn;
     });
@@ -255,33 +271,41 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
   const setTheme = useCallback(
     async (nextTheme: ThemeName) => {
       setThemeState(nextTheme);
-      applyAppearance(nextTheme, fontFamily, floatingOpacity, priorityColors);
+      applyAppearance(nextTheme, fontFamily, floatingOpacity, floatingAppearance, priorityColors);
       await setSetting("theme", nextTheme);
-      await emitAppearance({ theme: nextTheme, fontFamily, floatingOpacity, priorityColors });
+      await emitAppearance({ theme: nextTheme, fontFamily, floatingOpacity, floatingAppearance, priorityColors });
     },
-    [floatingOpacity, fontFamily, priorityColors],
+    [floatingAppearance, floatingOpacity, fontFamily, priorityColors],
   );
 
   const setFontFamily = useCallback(
     async (nextFontFamily: FontFamilyName) => {
       setFontFamilyState(nextFontFamily);
-      applyAppearance(theme, nextFontFamily, floatingOpacity, priorityColors);
+      applyAppearance(theme, nextFontFamily, floatingOpacity, floatingAppearance, priorityColors);
       await saveFontFamily(nextFontFamily);
-      await emitAppearance({ theme, fontFamily: nextFontFamily, floatingOpacity, priorityColors });
+      await emitAppearance({ theme, fontFamily: nextFontFamily, floatingOpacity, floatingAppearance, priorityColors });
     },
-    [floatingOpacity, priorityColors, theme],
+    [floatingAppearance, floatingOpacity, priorityColors, theme],
   );
 
   const setFloatingOpacity = useCallback(
     async (nextOpacity: number) => {
       const clamped = clampOpacity(nextOpacity, 0, 1, DEFAULT_FLOATING_OPACITY);
       setFloatingOpacityState(clamped);
-      applyAppearance(theme, fontFamily, clamped, priorityColors);
+      applyAppearance(theme, fontFamily, clamped, floatingAppearance, priorityColors);
       await saveFloatingOpacity(clamped);
-      await emitAppearance({ theme, fontFamily, floatingOpacity: clamped, priorityColors });
+      await emitAppearance({ theme, fontFamily, floatingOpacity: clamped, floatingAppearance, priorityColors });
     },
-    [fontFamily, priorityColors, theme],
+    [floatingAppearance, fontFamily, priorityColors, theme],
   );
+
+  const setFloatingAppearance = useCallback(async (patch: Partial<FloatingAppearanceSetting>) => {
+    const nextAppearance = { ...floatingAppearance, ...patch };
+    setFloatingAppearanceState(nextAppearance);
+    applyAppearance(theme, fontFamily, floatingOpacity, nextAppearance, priorityColors);
+    await saveFloatingAppearance(nextAppearance);
+    await emitAppearance({ theme, fontFamily, floatingOpacity, floatingAppearance: nextAppearance, priorityColors });
+  }, [floatingAppearance, floatingOpacity, fontFamily, priorityColors, theme]);
 
   const setDashboardAppearance = useCallback(async (patch: Partial<DashboardAppearanceSetting>) => {
     const nextAppearance = { ...dashboardAppearance, ...patch };
@@ -301,10 +325,10 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
 
   const setPriorityColors = useCallback(async (nextColors: Record<TaskPriority, string>) => {
     setPriorityColorsState(nextColors);
-    applyAppearance(theme, fontFamily, floatingOpacity, nextColors);
+    applyAppearance(theme, fontFamily, floatingOpacity, floatingAppearance, nextColors);
     await savePriorityColors(nextColors);
-    await emitAppearance({ theme, fontFamily, floatingOpacity, priorityColors: nextColors });
-  }, [floatingOpacity, fontFamily, theme]);
+    await emitAppearance({ theme, fontFamily, floatingOpacity, floatingAppearance, priorityColors: nextColors });
+  }, [floatingAppearance, floatingOpacity, fontFamily, theme]);
 
   const setAlwaysOnTop = useCallback(async (nextValue: boolean) => {
     setAlwaysOnTopState(nextValue);
@@ -341,6 +365,22 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
     } as CSSProperties;
   }, [dashboardAppearance]);
 
+  const floatingAppearanceStyle = useMemo(() => {
+    const backgroundImage =
+      floatingAppearance.backgroundImageDataUrl && floatingAppearance.backgroundImageDataUrl.trim()
+        ? `url("${floatingAppearance.backgroundImageDataUrl}")`
+        : "none";
+
+    return {
+      "--floating-base-color": floatingAppearance.baseColor,
+      "--floating-accent-color": floatingAppearance.accentColor,
+      "--floating-bg-image": backgroundImage,
+      "--floating-bg-opacity": backgroundImage === "none" ? "0" : "0.3",
+      "--floating-bg-size": floatingAppearance.backgroundFit === "repeat" ? "auto" : floatingAppearance.backgroundFit,
+      "--floating-bg-repeat": floatingAppearance.backgroundFit === "repeat" ? "repeat" : "no-repeat",
+    } as CSSProperties;
+  }, [floatingAppearance]);
+
   return {
     theme,
     setTheme,
@@ -348,6 +388,9 @@ export function useSettings({ manageFloatingWindow = true }: UseSettingsOptions 
     setFontFamily,
     floatingOpacity,
     setFloatingOpacity,
+    floatingAppearance,
+    setFloatingAppearance,
+    floatingAppearanceStyle,
     dashboardAppearance,
     setDashboardAppearance,
     resetDashboardAppearance,
