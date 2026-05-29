@@ -1,11 +1,10 @@
-import { FileText } from "lucide-react";
+import { FileText, Plus, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { EmptyState } from "../../components/common/EmptyState";
 import { Toast } from "../../components/common/Toast";
 import { PanelBody } from "../../components/layout/PanelBody";
 import type { Note, TaskScope } from "../../types/domain";
 import { useNotes } from "../notes/useNotes";
-import { MarkdownStudioHeader } from "./MarkdownStudioHeader";
 import { MarkdownEditorShell } from "./components/MarkdownEditorShell";
 import { useMarkdownAutosave, type MarkdownSaveStatus } from "./useMarkdownAutosave";
 import type { VditorMarkdownEditorHandle } from "./vditor/VditorMarkdownEditor";
@@ -57,9 +56,16 @@ export function MarkdownStudio() {
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [noteQuery, setNoteQuery] = useState("");
 
   const selectedNote = useMemo(() => notes.find((note) => note.id === selectedId) ?? null, [notes, selectedId]);
   const isNewDraft = selectedId === null;
+  const filteredNotes = useMemo(() => {
+    const query = noteQuery.trim().toLocaleLowerCase();
+    if (!query) return notes;
+
+    return notes.filter((note) => note.content.toLocaleLowerCase().includes(query));
+  }, [noteQuery, notes]);
 
   const autosave = useMarkdownAutosave({
     noteId: selectedId,
@@ -142,18 +148,26 @@ export function MarkdownStudio() {
 
   return (
     <PanelBody className="markdown-studio">
-      <MarkdownStudioHeader
-        title={title}
-        saveStatus={saveStatus}
-        canSaveNew={Boolean(draft.trim())}
-        isNewDraft={isNewDraft}
-        saving={saving}
-        onNew={() => void startNewNote()}
-        onSaveNew={() => void saveNewNote()}
-      />
       {error && <p className="rounded-md bg-red-50 p-2 text-xs text-red-700">{error}</p>}
       <div className="markdown-studio-layout markdown-studio-layout-vditor is-outline-open">
         <aside className="markdown-studio-sidebar">
+          <header className="markdown-sidebar-header">
+            <div>
+              <p>灵感文稿</p>
+              <strong>{notes.length} 篇</strong>
+            </div>
+            <button type="button" className="markdown-sidebar-new" aria-label="新建灵感文稿" onClick={() => void startNewNote()}>
+              <Plus size={16} />
+            </button>
+          </header>
+          <label className="markdown-note-search">
+            <Search size={15} aria-hidden="true" />
+            <input
+              value={noteQuery}
+              placeholder="搜索灵感"
+              onChange={(event) => setNoteQuery(event.target.value)}
+            />
+          </label>
           <button type="button" className={`markdown-note-item ${isNewDraft ? "is-active" : ""}`} onClick={() => void startNewNote()}>
             <FileText size={15} />
             <span className="min-w-0">
@@ -165,9 +179,11 @@ export function MarkdownStudio() {
             <p className="p-2 text-xs text-[var(--text-muted)]">正在读取灵感...</p>
           ) : notes.length === 0 ? (
             <EmptyState title="还没有灵感记录" />
+          ) : filteredNotes.length === 0 ? (
+            <EmptyState title="没有匹配的灵感" />
           ) : (
             <div className="markdown-note-list">
-              {notes.map((note) => (
+              {filteredNotes.map((note) => (
                 <button
                   key={note.id}
                   type="button"
