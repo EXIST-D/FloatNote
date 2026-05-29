@@ -6,11 +6,11 @@
 
 ## 下载
 
-当前版本：`v0.4.0`
+当前版本：`v0.5.4`
 
 Windows 安装包请前往 Releases 下载：
 
-[下载 FloatNote_0.4.0_x64-setup.exe](https://github.com/EXIST-D/FloatNote/releases/tag/v0.4.0)
+[下载 FloatNote_0.5.4_x64-setup.exe](https://github.com/EXIST-D/FloatNote/releases/tag/v0.5.4)
 
 ## 你可以用它做什么
 
