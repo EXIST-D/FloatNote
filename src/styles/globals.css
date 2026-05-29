@@ -138,27 +138,6 @@
   --menu-border: #a8c2a5;
 }
 
-:root[data-font-style="clear"] {
-  --font-body: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
-  --font-title: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
-  --note-text-size: 14px;
-  --note-line-height: 1.55;
-}
-
-:root[data-font-style="bookish"] {
-  --font-body: "KaiTi", "STKaiti", "FangSong", "Microsoft YaHei", serif;
-  --font-title: "KaiTi", "STKaiti", "FangSong", "Microsoft YaHei", serif;
-  --note-text-size: 14px;
-  --note-line-height: 1.65;
-}
-
-:root[data-font-style="compact"] {
-  --font-body: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif;
-  --font-title: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif;
-  --note-text-size: 13px;
-  --note-line-height: 1.45;
-}
-
 :root[data-font-family="yahei"] {
   --font-body: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
   --font-title: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
@@ -189,18 +168,6 @@
   --font-ui: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif;
   --note-text-size: 14px;
   --note-line-height: 1.64;
-}
-
-:root[data-paper-opacity="clear"] {
-  --paper-alpha: 0.72;
-}
-
-:root[data-paper-opacity="soft"] {
-  --paper-alpha: 0.86;
-}
-
-:root[data-paper-opacity="solid"] {
-  --paper-alpha: 1;
 }
 
 * {
@@ -268,36 +235,6 @@ button {
   background: rgb(var(--app-bg-rgb) / var(--paper-alpha));
   color: var(--accent);
   box-shadow: 0 1px 4px rgb(47 42 32 / 0.08);
-}
-
-.appearance-menu {
-  backdrop-filter: blur(10px);
-}
-
-.theme-choice,
-.setting-chip {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  padding: 6px 5px;
-  color: var(--text-muted);
-  transition:
-    color 0.16s ease,
-    border-color 0.16s ease,
-    background 0.16s ease;
-}
-
-.theme-choice:hover,
-.setting-chip:hover,
-.theme-choice.is-active,
-.setting-chip.is-active {
-  border-color: var(--accent);
-  background: rgb(var(--app-bg-rgb) / var(--paper-alpha));
-  color: var(--accent);
 }
 
 .task-title-collapsed {
@@ -1108,21 +1045,6 @@ button {
   --accent-soft: rgba(47, 102, 84, 0.13);
 }
 
-:root[data-font-style="clear"] {
-  --font-body: var(--font-ui);
-  --font-title: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", sans-serif;
-}
-
-:root[data-font-style="bookish"] {
-  --font-body: var(--font-note);
-  --font-title: var(--font-note);
-}
-
-:root[data-font-style="compact"] {
-  --font-body: var(--font-ui);
-  --font-title: var(--font-ui);
-}
-
 button,
 input,
 textarea {
@@ -1769,20 +1691,6 @@ textarea:focus,
 .settings-card h2 {
   color: var(--text-main);
   font-family: var(--font-title);
-}
-
-.setting-chip {
-  min-height: 34px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.3);
-  padding: 7px 10px;
-}
-
-.setting-chip.is-active {
-  border-color: rgba(124, 92, 200, 0.36);
-  background: var(--surface-selected);
-  color: var(--accent);
 }
 
 .settings-swatch-row {
@@ -3784,18 +3692,6 @@ textarea:focus,
   border-color: var(--desk-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--desk-accent) 14%, transparent);
   outline: 0;
-}
-
-.setting-chip {
-  border-color: var(--desk-border);
-  background: var(--desk-surface);
-  color: var(--desk-text);
-}
-
-.setting-chip.is-active {
-  border-color: var(--desk-accent);
-  background: var(--desk-accent-soft);
-  color: var(--desk-accent-strong);
 }
 
 .dashboard-background-preview {

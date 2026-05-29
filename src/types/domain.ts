@@ -4,12 +4,6 @@ export type DashboardTab = "home" | "search" | "today" | "week" | "notes" | "foc
 
 export type ThemeName = "paper" | "ink" | "night" | "book" | "reading" | "green";
 
-export type FontStyleName = "clear" | "bookish" | "compact";
-
-export type PaperOpacityName = "clear" | "soft" | "solid";
-
-export type MainWindowStyle = "desk" | "minimal" | "green";
-
 export type FontFamilyName = "yahei" | "songti" | "kaiti" | "fangsong";
 
 export type TaskPriority = "high" | "medium" | "low";

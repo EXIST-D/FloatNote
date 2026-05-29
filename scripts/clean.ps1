@@ -36,28 +36,9 @@ function Remove-InProject {
 }
 
 Remove-InProject "dist" -Recurse
+Remove-InProject ".tmp" -Recurse
 Remove-InProject ".superpowers" -Recurse
 Remove-InProject "src-tauri\gen" -Recurse
-
-$releaseCacheDirs = @(
-  "src-tauri\target\release\.fingerprint",
-  "src-tauri\target\release\deps",
-  "src-tauri\target\release\build",
-  "src-tauri\target\release\incremental",
-  "src-tauri\target\release\examples"
-)
-
-foreach ($path in $releaseCacheDirs) {
-  Remove-InProject $path -Recurse
-}
-
-$releaseCacheFiles = @(
-  "src-tauri\target\release\desktop_note.pdb",
-  "src-tauri\target\release\desktop_note.d"
-)
-
-foreach ($path in $releaseCacheFiles) {
-  Remove-InProject $path
-}
+Remove-InProject "src-tauri\target" -Recurse
 
 Write-Output "Cleaned generated files under $rootPath"

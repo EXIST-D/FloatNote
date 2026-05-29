@@ -5,7 +5,6 @@ import type {
   DashboardBackgroundSetting,
   FloatingAppearanceSetting,
   FontFamilyName,
-  MainWindowStyle,
   ReviewMode,
   TaskPriority,
 } from "../types/domain";
@@ -90,10 +89,6 @@ export function isWindowSizeSetting(value: unknown): value is WindowSizeSetting 
 
 export function isWindowBoundsSetting(value: unknown): value is WindowBoundsSetting {
   return isWindowPositionSetting(value) && isWindowSizeSetting(value);
-}
-
-export function isMainWindowStyle(value: string | null): value is MainWindowStyle {
-  return value === "desk" || value === "minimal" || value === "green";
 }
 
 export async function getPriorityColors() {
