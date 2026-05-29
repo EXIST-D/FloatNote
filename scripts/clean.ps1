@@ -39,6 +39,29 @@ Remove-InProject "dist" -Recurse
 Remove-InProject ".tmp" -Recurse
 Remove-InProject ".superpowers" -Recurse
 Remove-InProject "src-tauri\gen" -Recurse
-Remove-InProject "src-tauri\target" -Recurse
+
+$targetCacheDirs = @(
+  "src-tauri\target\debug",
+  "src-tauri\target\release\.fingerprint",
+  "src-tauri\target\release\build",
+  "src-tauri\target\release\deps",
+  "src-tauri\target\release\examples",
+  "src-tauri\target\release\incremental"
+)
+
+foreach ($path in $targetCacheDirs) {
+  Remove-InProject $path -Recurse
+}
+
+$targetCacheFiles = @(
+  "src-tauri\target\.rustc_info.json",
+  "src-tauri\target\CACHEDIR.TAG",
+  "src-tauri\target\release\desktop_note.d",
+  "src-tauri\target\release\desktop_note.pdb"
+)
+
+foreach ($path in $targetCacheFiles) {
+  Remove-InProject $path
+}
 
 Write-Output "Cleaned generated files under $rootPath"
