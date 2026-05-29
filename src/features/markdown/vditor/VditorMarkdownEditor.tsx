@@ -1,11 +1,15 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import Vditor from "vditor";
 import "vditor/dist/index.css";
+import { buildVditorOptions, toolbarTipLabels } from "./vditorConfig";
 
 export interface VditorMarkdownEditorHandle {
   focus: () => void;
   getValue: () => string;
+  insertValue: (value: string, render?: boolean) => void;
+  replaceValue: (value: string) => void;
   scrollToHeading: (index: number) => void;
+  setValue: (value: string) => void;
 }
 
 interface VditorMarkdownEditorProps {
@@ -15,45 +19,6 @@ interface VditorMarkdownEditorProps {
   onChange: (value: string) => void;
   onSaveShortcut?: () => void;
 }
-
-const toolbarTipLabels: Record<string, string> = {
-  headings: "标题",
-  bold: "加粗",
-  italic: "斜体",
-  strike: "删除线",
-  quote: "引用",
-  list: "无序列表",
-  "ordered-list": "有序列表",
-  check: "任务列表",
-  line: "分割线",
-  code: "代码块",
-  "inline-code": "行内代码",
-  link: "链接",
-  table: "表格",
-  undo: "撤销",
-  redo: "重做",
-};
-
-const toolbar = [
-  { name: "headings", tip: toolbarTipLabels.headings, tipPosition: "s" },
-  { name: "bold", tip: toolbarTipLabels.bold, tipPosition: "s" },
-  { name: "italic", tip: toolbarTipLabels.italic, tipPosition: "s" },
-  { name: "strike", tip: toolbarTipLabels.strike, tipPosition: "s" },
-  "|",
-  { name: "quote", tip: toolbarTipLabels.quote, tipPosition: "s" },
-  { name: "list", tip: toolbarTipLabels.list, tipPosition: "s" },
-  { name: "ordered-list", tip: toolbarTipLabels["ordered-list"], tipPosition: "s" },
-  { name: "check", tip: toolbarTipLabels.check, tipPosition: "s" },
-  "|",
-  { name: "line", tip: toolbarTipLabels.line, tipPosition: "s" },
-  { name: "code", tip: toolbarTipLabels.code, tipPosition: "s" },
-  { name: "inline-code", tip: toolbarTipLabels["inline-code"], tipPosition: "s" },
-  { name: "link", tip: toolbarTipLabels.link, tipPosition: "s" },
-  { name: "table", tip: toolbarTipLabels.table, tipPosition: "s" },
-  "|",
-  { name: "undo", tip: toolbarTipLabels.undo, tipPosition: "s" },
-  { name: "redo", tip: toolbarTipLabels.redo, tipPosition: "s" },
-] as const;
 
 const VDITOR_CDN = "/vendor/vditor";
 const VDITOR_ICON = "ant";
@@ -200,10 +165,22 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
     useImperativeHandle(ref, () => ({
       focus: () => editorRef.current?.focus(),
       getValue: () => editorRef.current?.getValue() ?? valueRef.current,
+      insertValue: (nextValue: string, render = true) => {
+        editorRef.current?.insertValue(nextValue, render);
+      },
+      replaceValue: (nextValue: string) => {
+        valueRef.current = nextValue;
+        editorRef.current?.setValue(nextValue, true);
+        onChangeRef.current(nextValue);
+      },
       scrollToHeading: (index: number) => {
         const editorRoot = hostRef.current?.querySelector(".vditor-reset");
         const heading = editorRoot?.querySelectorAll("h1,h2,h3,h4,h5,h6").item(index);
         heading?.scrollIntoView({ block: "center", behavior: "smooth" });
+      },
+      setValue: (nextValue: string) => {
+        valueRef.current = nextValue;
+        editorRef.current?.setValue(nextValue, true);
       },
     }));
 
@@ -220,46 +197,25 @@ export const VditorMarkdownEditor = forwardRef<VditorMarkdownEditorHandle, Vdito
         .then(() => {
           if (disposed || !hostRef.current) return;
 
-          const editor = new Vditor(hostRef.current, {
-            mode: "ir",
-            toolbarConfig: {
-              pin: true,
-            },
-            lang: "zh_CN",
-            theme: "classic",
-            icon: VDITOR_ICON,
-            cdn: VDITOR_CDN,
-            height: "100%",
-            minHeight: 420,
-            placeholder,
-            cache: {
-              enable: false,
-            },
-            toolbar: [...toolbar],
-            preview: {
-              markdown: {
-                toc: true,
-              },
-              theme: {
-                current: "light",
-              },
-              hljs: {
-                enable: true,
-                style: "github",
-              },
-            },
-            input: (markdown: string) => {
+          const editor = new Vditor(
+            hostRef.current,
+            buildVditorOptions({
+              cdn: VDITOR_CDN,
+              placeholder,
+              value: valueRef.current,
+              onInput: (markdown: string) => {
               valueRef.current = markdown;
               onChangeRef.current(markdown);
             },
-            after: () => {
+              onReady: () => {
               editor.setValue(valueRef.current, true);
               editor.disabledCache();
               tooltipCleanupRef.current?.();
               tooltipCleanupRef.current = installToolbarTooltips(host);
               if (autoFocus) window.setTimeout(() => editor.focus(), 0);
             },
-          });
+            }),
+          );
 
           editorRef.current = editor;
         });
